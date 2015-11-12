@@ -1,0 +1,39 @@
+{
+  "name": "redux-example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "watchify src/js/index.js -o dist/bundle.js -t babelify -v --debug & live-server --entry-file=index.html dist & watch 'sass src/styles/main.sass dist/tmp.css && postcss --use autoprefixer -o dist/main.css dist/tmp.css' src/styles -du"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "autoprefixer": "5.2.0",
+    "babelify": "6.3.0",
+    "browserify": "11.0.1",
+    "envify": "^3.4.0",
+    "event-stream": "^3.3.1",
+    "gulp": "^3.9.0",
+    "live-server": "0.8.1",
+    "postcss-cli": "1.5.0",
+    "reactify": "1.1.1",
+    "redux-devtools": "^2.1.5",
+    "uglify-js": "^2.5.0",
+    "watch": "0.16.0",
+    "watchify": "3.3.1"
+  },
+  "dependencies": {
+    "babel-polyfill": "^6.0.16",
+    "classnames": "^2.2.0",
+    "es6-promise": "^3.0.2",
+    "isomorphic-fetch": "^2.2.0",
+    "parse": "^1.6.8",
+    "pusher-js": "^3.0.0",
+    "react": "^0.14.0",
+    "react-dom": "^0.14.0",
+    "react-redux": "^4.0.0",
+    "redux": "^3.0.3",
+    "redux-thunk": "^1.0.0"
+  }
+}
