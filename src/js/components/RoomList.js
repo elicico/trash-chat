@@ -62,7 +62,7 @@ class RoomList extends Component {
             >
             <input
               type='text'
-              placeholder="type your message here"
+              placeholder="new room name here"
               className="modal__input"
               value={ this.state.value }
               onChange={ this.handleModalChange.bind(this) }
