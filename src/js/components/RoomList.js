@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import cNames from 'classnames'
-import { fetchRooms, changeRoom, fetchUsers, addRoom } from '../actions/actions'
+import { fetchRooms, changeRoom, fetchUsers, addRoom, toggleModalVisibility } from '../actions/actions'
 import Modal from "./Modal"
 
 class RoomList extends Component {
@@ -9,7 +9,7 @@ class RoomList extends Component {
     super(props)
     this.handleClick = this.handleClick.bind(this)
     this.renderRoom = this.renderRoom.bind(this)
-    this.state = { modalIsOpen: false, value: "" }
+    this.state = { value: "" }
   }
 
   componentDidMount() {
@@ -18,11 +18,12 @@ class RoomList extends Component {
   }
 
   openModal(e) {
-    this.setState({ modalIsOpen: true })
+    this.props.dispatch(toggleModalVisibility(false, true))
   }
 
   closeModal() {
-    this.setState({ value: "", modalIsOpen: false })
+    this.props.dispatch(toggleModalVisibility(false, false))
+    this.setState({ value: "" })
   }
 
   handleModalChange(e) {
@@ -32,7 +33,7 @@ class RoomList extends Component {
   handleModalKeyDown(e) {
     if (e.keyCode === 13) {
       this.props.dispatch(addRoom(this.state.value))
-      this.setState({ value: "", modalIsOpen: false })
+      this.setState({ value: "" })
     }
   }
 
@@ -51,12 +52,12 @@ class RoomList extends Component {
         <div className="roomList">
         <ul className="roomList__ul">{ this.props.rooms.map(this.renderRoom) }</ul>
         <button
-          className="roomList__addRoom"
+          className="button roomList__addRoom"
           onClick={ this.openModal.bind(this) }
           >
           add room
         </button>
-        { this.state.modalIsOpen && (
+        { this.props.roomModalIsOpen && (
           <Modal
             onClose={ this.closeModal.bind(this) }
             >
@@ -94,12 +95,13 @@ class RoomList extends Component {
 }
 
 function mapStateToProps(state) {
-  const { currentRoomId, rooms } = state
+  const { currentRoomId, rooms, roomModalIsOpen } = state
 
   return {
     pending: rooms.pending,
     rooms: Object.values(rooms.records),
-    roomId: currentRoomId
+    roomId: currentRoomId,
+    roomModalIsOpen: roomModalIsOpen.roomModalIsOpen
   }
 }
 

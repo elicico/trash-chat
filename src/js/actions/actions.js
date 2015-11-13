@@ -23,6 +23,8 @@ export const ADD_ROOM_PENDING = 'ADD_ROOM_PENDING'
 export const ADD_ROOM_SUCCESS = 'ADD_ROOM_SUCCESS'
 export const ADD_ROOM_FAIL = 'ADD_ROOM_FAIL'
 
+export const TOGGLE_MODAL_VISIBILITY = 'TOGGLE_MODAL_VISIBILITY'
+
 
 const Room = Parse.Object.extend("Room");
 const User = Parse.Object.extend("_User");
@@ -138,5 +140,15 @@ export function addRoom(newRoom) {
         dispatch({ type: ADD_ROOM_FAIL, payload: error })
       }
     )
+  }
+}
+
+export function toggleModalVisibility(appModalIsOpen, roomModalIsOpen) {
+  let payload = {
+    appModalIsOpen,
+    roomModalIsOpen
+  }
+  return function(dispatch, getState) {
+    dispatch({ type: TOGGLE_MODAL_VISIBILITY, payload })
   }
 }

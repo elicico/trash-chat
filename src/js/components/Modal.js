@@ -2,8 +2,7 @@ import React, { Component, PropTypes } from 'react'
 
 export default class Modal extends Component {
 
-  handleClose(e) {
-    e.preventDefault()
+  handleClose() {
     this.props.onClose()
   }
 

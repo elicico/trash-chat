@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux'
-import { FETCH_ROOMS_PENDING, FETCH_ROOMS_SUCCESS, FETCH_MESSAGES_PENDING, FETCH_MESSAGES_SUCCESS, CHANGE_ROOM, FETCH_USERS_PENDING, FETCH_USERS_SUCCESS, SEND_MESSAGE_SUCCESS, ADD_ROOM_PENDING, ADD_ROOM_SUCCESS } from '../actions/actions'
+import { FETCH_ROOMS_PENDING, FETCH_ROOMS_SUCCESS, FETCH_MESSAGES_PENDING, FETCH_MESSAGES_SUCCESS, CHANGE_ROOM, FETCH_USERS_PENDING, FETCH_USERS_SUCCESS, SEND_MESSAGE_SUCCESS, ADD_ROOM_PENDING, ADD_ROOM_SUCCESS, TOGGLE_MODAL_VISIBILITY } from '../actions/actions'
 
 function currentRoomId(state = null, action) {
   switch (action.type) {
@@ -11,6 +11,23 @@ function currentRoomId(state = null, action) {
       return state
   }
 }
+
+function modal(
+  state = {
+    appModalIsOpen: false,
+    roomModalIsOpen: false
+  }, action) {
+    switch (action.type) {
+      case TOGGLE_MODAL_VISIBILITY:
+        return {
+          ...state,
+          appModalIsOpen: action.payload.appModalIsOpen,
+          roomModalIsOpen: action.payload.roomModalIsOpen
+          }
+      default:
+        return state
+    }
+  }
 
 function messages(
   state = {
@@ -157,7 +174,9 @@ const rootReducer = function(state = {}, action) {
     users: users(state.users, action),
     rooms: rooms(state.rooms, action),
     messages: messages(state.messages, action),
-    currentRoomId: currentRoomId(state.currentRoomId, action)
+    currentRoomId: currentRoomId(state.currentRoomId, action),
+    appModalIsOpen: modal(state.appModalIsOpen, action),
+    roomModalIsOpen: modal(state.roomModalIsOpen, action)
   }
 }
 
