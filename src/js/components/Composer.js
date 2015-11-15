@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
+import Parse from 'parse'
 
 import { sendMessage } from "../actions/actions"
 
@@ -15,7 +16,7 @@ class Composer extends Component {
 
   handleKeyDown(e) {
     if (e.keyCode === 13) {
-      this.props.dispatch(sendMessage(this.state.value, this.props.currentRoomId, "dJtkbSZNpS"))
+      this.props.dispatch(sendMessage(this.state.value, this.props.currentRoomId, Parse.User.current().id))
       this.setState({ value: "" })
     }
   }

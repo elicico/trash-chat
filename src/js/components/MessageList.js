@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import cNames from 'classnames'
 import { fetchMessages } from '../actions/actions'
 import pusherChannel from '../pusherChannel'
+import Parse from 'parse'
 
 class MessageList extends Component {
   constructor(props) {
@@ -74,7 +75,7 @@ class MessageList extends Component {
         key={ message.objectId }
       >
         <div className={ textClass }>
-          <span className="messageList__item__text__username">{ users[i].username }</span>
+          <span className="messageList__item__text__username">{ Parse.User.current().get("username") }</span>
           <br />
           { message.message }
         </div>

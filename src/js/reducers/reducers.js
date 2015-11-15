@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux'
-import { FETCH_ROOMS_PENDING, FETCH_ROOMS_SUCCESS, FETCH_MESSAGES_PENDING, FETCH_MESSAGES_SUCCESS, CHANGE_ROOM, FETCH_USERS_PENDING, FETCH_USERS_SUCCESS, SEND_MESSAGE_SUCCESS, ADD_ROOM_PENDING, ADD_ROOM_SUCCESS, TOGGLE_MODAL_VISIBILITY } from '../actions/actions'
+import { FETCH_ROOMS_PENDING, FETCH_ROOMS_SUCCESS, FETCH_MESSAGES_PENDING, FETCH_MESSAGES_SUCCESS, CHANGE_ROOM, FETCH_USERS_PENDING, FETCH_USERS_SUCCESS, SEND_MESSAGE_SUCCESS, ADD_ROOM_PENDING, ADD_ROOM_SUCCESS, TOGGLE_MODAL_VISIBILITY, ADD_USER_PENDING, ADD_USER_SUCCESS } from '../actions/actions'
 
 function currentRoomId(state = null, action) {
   switch (action.type) {
@@ -169,6 +169,35 @@ function rooms(
   }
 }
 
+function activeUser(
+  state = {
+    pending: false,
+    error: null,
+    records: {}
+  }, action) {
+    switch (action.type) {
+      case ADD_USER_PENDING:
+        return { ...state, pending: true }
+      case ADD_USER_SUCCESS:
+        let records = {}
+        let loggedUser = action.payload
+
+        records[loggedUser] = {
+          objectId: loggedUser.id,
+          username: loggedUser.get("username")
+        }
+
+        return {
+          ...state,
+          pending: false,
+          records
+        }
+
+      default:
+        return state
+    }
+  }
+
 const rootReducer = function(state = {}, action) {
   return {
     users: users(state.users, action),
@@ -176,7 +205,8 @@ const rootReducer = function(state = {}, action) {
     messages: messages(state.messages, action),
     currentRoomId: currentRoomId(state.currentRoomId, action),
     appModalIsOpen: modal(state.appModalIsOpen, action),
-    roomModalIsOpen: modal(state.roomModalIsOpen, action)
+    roomModalIsOpen: modal(state.roomModalIsOpen, action),
+    loggedUser: activeUser(state.activeUser, action)
   }
 }
 

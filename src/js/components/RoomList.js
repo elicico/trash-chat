@@ -33,6 +33,7 @@ class RoomList extends Component {
   handleModalKeyDown(e) {
     if (e.keyCode === 13) {
       this.props.dispatch(addRoom(this.state.value))
+      this.props.dispatch(toggleModalVisibility(false, false))
       this.setState({ value: "" })
     }
   }
