@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import RoomList from "./components/RoomList"
 import MessageList from "./components/MessageList"
 import Composer from "./components/Composer"
-import { toggleModalVisibility, addUser, logUser } from './actions/actions'
+import { signupUser, logUser } from './actions/actions'
 import Modal from './components/Modal'
 
 class App extends Component {
@@ -12,12 +12,7 @@ class App extends Component {
     this.state = { username: "", password: "" }
   }
 
-  componentDidMount() {
-    this.props.dispatch(toggleModalVisibility(true, false))
-  }
-
   closeModal() {
-    this.props.dispatch(toggleModalVisibility(false, false))
   }
 
   handleUsernameChange(e) {
@@ -30,13 +25,11 @@ class App extends Component {
 
   handleSignupClick(e) {
     e.preventDefault()
-    this.props.dispatch(toggleModalVisibility(false, false))
-    this.props.dispatch(addUser(this.state.username, this.state.password))
+    this.props.dispatch(signupUser(this.state.username, this.state.password))
   }
 
   handleLoginClick(e) {
     e.preventDefault()
-    this.props.dispatch(toggleModalVisibility(false, false))
     this.props.dispatch(logUser(this.state.username, this.state.password))
   }
 
@@ -84,11 +77,10 @@ class App extends Component {
 }
 
 function mapStateToProps(state) {
-  const { appModalIsOpen, loggedUser } = state
+  const { activeUserId } = state
 
   return {
-    appModalIsOpen: appModalIsOpen.appModalIsOpen,
-    loggedUser: loggedUser
+    appModalIsOpen: !activeUserId
   }
 }
 

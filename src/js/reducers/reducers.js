@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux'
-import { FETCH_ROOMS_PENDING, FETCH_ROOMS_SUCCESS, FETCH_MESSAGES_PENDING, FETCH_MESSAGES_SUCCESS, CHANGE_ROOM, FETCH_USERS_PENDING, FETCH_USERS_SUCCESS, SEND_MESSAGE_SUCCESS, ADD_ROOM_PENDING, ADD_ROOM_SUCCESS, TOGGLE_MODAL_VISIBILITY, ADD_USER_PENDING, ADD_USER_SUCCESS } from '../actions/actions'
+import { FETCH_ROOMS_PENDING, FETCH_ROOMS_SUCCESS, FETCH_MESSAGES_PENDING, FETCH_MESSAGES_SUCCESS, CHANGE_ROOM, FETCH_USERS_PENDING, FETCH_USERS_SUCCESS, SEND_MESSAGE_SUCCESS, ADD_ROOM_PENDING, ADD_ROOM_SUCCESS, TOGGLE_MODAL_VISIBILITY, SIGNUP_USER_PENDING, SIGNUP_USER_SUCCESS } from '../actions/actions'
 
 function currentRoomId(state = null, action) {
   switch (action.type) {
@@ -14,14 +14,12 @@ function currentRoomId(state = null, action) {
 
 function modal(
   state = {
-    appModalIsOpen: false,
     roomModalIsOpen: false
   }, action) {
     switch (action.type) {
       case TOGGLE_MODAL_VISIBILITY:
         return {
           ...state,
-          appModalIsOpen: action.payload.appModalIsOpen,
           roomModalIsOpen: action.payload.roomModalIsOpen
           }
       default:
@@ -97,7 +95,6 @@ function users(
         for (let i=0; i<action.payload.length; i++) {
           let user = action.payload[i];
           records[user.id] = {
-            email: user.get("email"),
             objectId: user.id,
             username: user.get("username")
           }
@@ -106,6 +103,19 @@ function users(
         return {
           ...state,
           pending: false,
+          records
+        }
+      case SIGNUP_USER_SUCCESS:
+        var records = state.records
+        let user = action.payload
+
+        records[user.id] = {
+          objectId: user.id,
+          username: user.get("username")
+        }
+
+        return {
+          ...state,
           records
         }
       default:
@@ -169,32 +179,12 @@ function rooms(
   }
 }
 
-function activeUser(
-  state = {
-    pending: false,
-    error: null,
-    records: {}
-  }, action) {
+function activeUserId(state = null, action) {
     switch (action.type) {
-      case ADD_USER_PENDING:
-        return { ...state, pending: true }
-      case ADD_USER_SUCCESS:
-        let records = {}
-        let loggedUser = action.payload
-
-        records[loggedUser] = {
-          objectId: loggedUser.id,
-          username: loggedUser.get("username")
-        }
-
-        return {
-          ...state,
-          pending: false,
-          records
-        }
-
+      case SIGNUP_USER_SUCCESS:
+        return action.payload.id;
       default:
-        return state
+        return state;
     }
   }
 
@@ -204,9 +194,8 @@ const rootReducer = function(state = {}, action) {
     rooms: rooms(state.rooms, action),
     messages: messages(state.messages, action),
     currentRoomId: currentRoomId(state.currentRoomId, action),
-    appModalIsOpen: modal(state.appModalIsOpen, action),
     roomModalIsOpen: modal(state.roomModalIsOpen, action),
-    loggedUser: activeUser(state.activeUser, action)
+    activeUserId: activeUserId(state.activeUserId, action)
   }
 }
 

@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import cNames from 'classnames'
-import { fetchRooms, changeRoom, fetchUsers, addRoom, toggleModalVisibility } from '../actions/actions'
+import { fetchRooms, changeRoom, fetchUsers, addRoom, toggleRoomModalVisibility } from '../actions/actions'
 import Modal from "./Modal"
 
 class RoomList extends Component {
@@ -18,11 +18,11 @@ class RoomList extends Component {
   }
 
   openModal(e) {
-    this.props.dispatch(toggleModalVisibility(false, true))
+    this.props.dispatch(toggleRoomModalVisibility(true))
   }
 
   closeModal() {
-    this.props.dispatch(toggleModalVisibility(false, false))
+    this.props.dispatch(toggleRoomModalVisibility(false))
     this.setState({ value: "" })
   }
 
@@ -33,7 +33,7 @@ class RoomList extends Component {
   handleModalKeyDown(e) {
     if (e.keyCode === 13) {
       this.props.dispatch(addRoom(this.state.value))
-      this.props.dispatch(toggleModalVisibility(false, false))
+      this.props.dispatch(toggleRoomModalVisibility(false))
       this.setState({ value: "" })
     }
   }

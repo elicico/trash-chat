@@ -25,9 +25,9 @@ export const ADD_ROOM_FAIL = 'ADD_ROOM_FAIL'
 
 export const TOGGLE_MODAL_VISIBILITY = 'TOGGLE_MODAL_VISIBILITY'
 
-export const ADD_USER_PENDING = 'ADD_USER_PENDING'
-export const ADD_USER_SUCCESS = 'ADD_USER_SUCCESS'
-export const ADD_USER_FAIL = 'ADD_USER_FAIL'
+export const SIGNUP_USER_PENDING = 'SIGNUP_USER_PENDING'
+export const SIGNUP_USER_SUCCESS = 'SIGNUP_USER_SUCCESS'
+export const SIGNUP_USER_FAIL = 'SIGNUP_USER_FAIL'
 
 
 const Room = Parse.Object.extend("Room");
@@ -147,30 +147,32 @@ export function addRoom(newRoom) {
   }
 }
 
-export function toggleModalVisibility(appModalIsOpen, roomModalIsOpen) {
-  let payload = {
-    appModalIsOpen,
-    roomModalIsOpen
-  }
+export function toggleRoomModalVisibility(roomModalIsOpen) {
+  let payload = { roomModalIsOpen }
+
   return function(dispatch, getState) {
     dispatch({ type: TOGGLE_MODAL_VISIBILITY, payload })
   }
 }
 
-export function addUser(username, password) {
+export function signupUser(username, password) {
   return function(dispatch, getState) {
-    dispatch({ type: ADD_USER_PENDING })
+    dispatch({ type: SIGNUP_USER_PENDING })
 
     var user = new Parse.User()
     user.set("username", username)
     user.set("password", password)
     user.signUp().then(
       result => {
-        dispatch({ type: ADD_USER_SUCCESS, payload: result })
+        dispatch({ type: SIGNUP_USER_SUCCESS, payload: result })
       },
       (model, error) => {
-        dispatch({ type: ADD_USER_FAIL, payload: error })
+        dispatch({ type: SIGNUP_USER_FAIL, payload: error })
       }
     )
   }
+}
+
+export function setActiveUser(user) {
+  return { type: SIGNUP_USER_SUCCESS, payload: user };
 }

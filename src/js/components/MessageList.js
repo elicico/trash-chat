@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import cNames from 'classnames'
-import { fetchMessages } from '../actions/actions'
+import { fetchMessages, fetchUsers } from '../actions/actions'
 import pusherChannel from '../pusherChannel'
 import Parse from 'parse'
 
@@ -15,6 +15,7 @@ class MessageList extends Component {
     if (this.props.roomId) {
       this.props.dispatch(fetchMessages(this.props.roomId))
     }
+    this.props.dispatch(fetchUsers())
 
     pusherChannel.bind('messageSent', ({ roomId }) => {
       if (roomId === this.props.roomId) {
@@ -59,14 +60,14 @@ class MessageList extends Component {
 
     let messageClass = cNames({
       'messageList__item cf': true,
-      'messageList__item--blue': message.userId === this.props.messages[0].userId,
-      'messageList__item--pink': message.userId !== this.props.messages[0].userId
+      'messageList__item--blue': message.userId !== this.props.activeUserId,
+      'messageList__item--pink': message.userId === this.props.activeUserId
     })
 
     let textClass = cNames({
       'messageList__item__text': true,
-      'messageList__item__text--left': message.userId === this.props.messages[0].userId,
-      'messageList__item__text--right': message.userId !== this.props.messages[0].userId
+      'messageList__item__text--left': message.userId !== this.props.activeUserId,
+      'messageList__item__text--right': message.userId === this.props.activeUserId
     })
 
     return(
@@ -75,7 +76,7 @@ class MessageList extends Component {
         key={ message.objectId }
       >
         <div className={ textClass }>
-          <span className="messageList__item__text__username">{ Parse.User.current().get("username") }</span>
+          <span className="messageList__item__text__username">{ users[i].username }</span>
           <br />
           { message.message }
         </div>
@@ -85,7 +86,7 @@ class MessageList extends Component {
 }
 
 function mapStateToProps(state) {
-  const { currentRoomId, users: stateUsers, messages: stateMessages } = state
+  const { currentRoomId, users: stateUsers, messages: stateMessages, activeUserId } = state
 
   let messages = Object.values(stateMessages.records)
     .filter(({ roomId }) => roomId === currentRoomId )
@@ -93,7 +94,7 @@ function mapStateToProps(state) {
 
   let users = messages.map(({ userId }) => stateUsers.records[userId]);
 
-  return { messages, users, roomId: currentRoomId };
+  return { messages, users, roomId: currentRoomId, activeUserId };
 }
 
 export default connect(mapStateToProps)(MessageList)

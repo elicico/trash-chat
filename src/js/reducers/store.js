@@ -8,6 +8,8 @@ const createStoreWithMiddlewareAndDevTools = compose(
   devTools()
 )(createStore)
 
-export default function configureStore(initialState) {
+function configureStore(initialState) {
   return createStoreWithMiddlewareAndDevTools(rootReducer, initialState)
 }
+
+export default configureStore()

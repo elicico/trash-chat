@@ -16,7 +16,7 @@ class Composer extends Component {
 
   handleKeyDown(e) {
     if (e.keyCode === 13) {
-      this.props.dispatch(sendMessage(this.state.value, this.props.currentRoomId, Parse.User.current().id))
+      this.props.dispatch(sendMessage(this.state.value, this.props.currentRoomId, this.props.activeUserId))
       this.setState({ value: "" })
     }
   }
@@ -39,10 +39,11 @@ class Composer extends Component {
 }
 
 function mapStateToProps(state) {
-  const { currentRoomId } = state
+  const { currentRoomId, activeUserId } = state
 
   return {
-    currentRoomId
+    currentRoomId,
+    activeUserId
   }
 }
 
