@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import cNames from 'classnames'
-import { fetchMessages, fetchUsers } from '../actions/actions'
+import { fetchMessages, fetchUsers, fetchUser, fetchMessage } from '../actions/actions'
 import pusherChannel from '../pusherChannel'
 import Parse from 'parse'
 
@@ -17,11 +17,16 @@ class MessageList extends Component {
     }
     this.props.dispatch(fetchUsers())
 
-    pusherChannel.bind('messageSent', ({ roomId }) => {
-      if (roomId === this.props.roomId) {
-        this.props.dispatch(fetchMessages(this.props.roomId))
-      }
+    pusherChannel.bind('messageSent', (object) => {
+      this.props.dispatch(fetchMessage(object.messageId))
     });
+
+    pusherChannel.bind('userSignup', (object) => {
+      this.props.dispatch(fetchUser(object.userId))
+    });
+
+    let node = this.refs.messageList
+    this.shouldScrollBottom = node.scrollTop + node.offsetHeight === node.scrollHeight
   }
 
   componentWillReceiveProps(newProps) {
@@ -36,10 +41,8 @@ class MessageList extends Component {
   }
 
   componentDidUpdate() {
-    if (this.shouldScrollBottom) {
-      let node = this.refs.messageList
-      node.scrollTop = node.scrollHeight
-    }
+    let node = this.refs.messageList
+    node.scrollTop = node.scrollHeight
   }
 
   render() {

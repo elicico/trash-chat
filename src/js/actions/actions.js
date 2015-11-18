@@ -35,6 +35,31 @@ export const LOGIN_USER_FAIL = 'LOGIN_USER_FAIL'
 
 export const LOGOUT_USER = 'LOGOUT_USER'
 
+export const FETCH_USER_PENDING = 'FETCH_USER_PENDING'
+export const FETCH_USER_SUCCESS = 'FETCH_USER_SUCCESS'
+export const FETCH_USER_FAIL = 'FETCH_USER_FAIL'
+
+export const FETCH_MESSAGE_PENDING = 'FETCH_MESSAGE_PENDING'
+export const FETCH_MESSAGE_SUCCESS = 'FETCH_MESSAGE_SUCCESS'
+export const FETCH_MESSAGE_FAIL = 'FETCH_MESSAGE_FAIL'
+
+export const FETCH_ROOM_PENDING = 'FETCH_ROOM_PENDING'
+export const FETCH_ROOM_SUCCESS = 'FETCH_ROOM_SUCCESS'
+export const FETCH_ROOM_FAIL = 'FETCH_ROOM_FAIL'
+
+let pushEvent = function(eventName, payload) {
+  payload.eventName = eventName;
+
+  return fetch(
+    'https://zapier.com/hooks/catch/3ks388/',
+    {
+      method: 'POST',
+      headers: { 'Accept': 'application/json' },
+      body: JSON.stringify(payload)
+    }
+  );
+}
+
 
 const Room = Parse.Object.extend("Room");
 const User = Parse.Object.extend("_User");
@@ -55,6 +80,21 @@ export function fetchRooms() {
   }
 }
 
+export function fetchRoom(roomAdded) {
+  return function(dispatch, getState) {
+    dispatch({ type: FETCH_ROOM_PENDING })
+
+    let room = new Parse.Query(Room)
+    room.get(roomAdded).then(
+      room => {
+        dispatch({ type: FETCH_ROOM_SUCCESS, payload: room })
+      },
+      (model, error) => {
+        dispatch({ type: FETCH_ROOM_FAIL, payload: error })
+      }
+    );
+  }
+}
 
 export function fetchMessages(roomId) {
   return function(dispatch, getState) {
@@ -64,7 +104,7 @@ export function fetchMessages(roomId) {
     var room = new Room()
     room.id = roomId
     messageQuery.equalTo("room", room)
-
+    messageQuery.limit(1000)
     messageQuery.find().then(
       messages => {
         dispatch({ type: FETCH_MESSAGES_SUCCESS, payload: messages })
@@ -73,6 +113,22 @@ export function fetchMessages(roomId) {
         dispatch({ type: FETCH_MESSAGES_FAIL, payload: error })
       }
     );
+  }
+}
+
+export function fetchMessage(messageId) {
+  return function(dispatch, getState) {
+    dispatch({ type: FETCH_MESSAGE_PENDING })
+
+    let newMessage = new Parse.Query(Message)
+    newMessage.get(messageId).then(
+      message => {
+        dispatch({ type: FETCH_MESSAGE_SUCCESS, payload: message })
+      },
+      (model, error) => {
+        dispatch({ type: FETCH_MESSAGE_FAIL, payload: error })
+      }
+    )
   }
 }
 
@@ -99,6 +155,22 @@ export function fetchUsers() {
   }
 }
 
+export function fetchUser(userId) {
+  return function(dispatch, getState) {
+    dispatch({ type: FETCH_USER_PENDING })
+
+    let newUser = new Parse.Query(Parse.User)
+    newUser.get(userId).then(
+      user => {
+        dispatch({ type: FETCH_USER_SUCCESS, payload: user })
+      },
+      (model, error) => {
+        dispatch({ type: FETCH_USER_FAIL, payload: error })
+      }
+    )
+  }
+}
+
 export function sendMessage(message, roomId, userId) {
   return function(dispatch, getState) {
     dispatch({ type: SEND_MESSAGE_PENDING })
@@ -115,18 +187,7 @@ export function sendMessage(message, roomId, userId) {
     newMessage.set("user", user)
     newMessage.save().then(
       result => {
-
-        fetch(
-          'https://zapier.com/hooks/catch/3ks388/',
-          {
-            method: 'POST',
-            headers: {
-              'Accept': 'application/json'
-            },
-            body: JSON.stringify({ roomId })
-          }
-        )
-
+        pushEvent("messageSent", { messageId: result.id });
         dispatch({ type: SEND_MESSAGE_SUCCESS, payload: result })
       },
       (model, error) => {
@@ -144,6 +205,7 @@ export function addRoom(newRoom) {
     room.set("name", newRoom)
     room.save().then(
       result => {
+        pushEvent("roomAdded", { roomId: result.id });
         dispatch({ type: ADD_ROOM_SUCCESS, payload: result })
       },
       (model, error) => {
@@ -170,7 +232,9 @@ export function signupUser(username, password) {
     user.set("password", password)
     user.signUp().then(
       result => {
-        dispatch({ type: SIGNUP_USER_SUCCESS, payload: result })
+        pushEvent("userSignup", { userId: result.id });
+        dispatch({ type: LOGIN_USER_SUCCESS, payload: result })
+        dispatch({ type: FETCH_USER_SUCCESS, payload: result })
       },
       (model, error) => {
         dispatch({ type: SIGNUP_USER_FAIL, payload: error })
@@ -180,10 +244,11 @@ export function signupUser(username, password) {
 }
 
 export function setActiveUser(user) {
-  return { type: SIGNUP_USER_SUCCESS, payload: user };
+  return { type: LOGIN_USER_SUCCESS, payload: user };
 }
 
 export function logout(activeUser) {
+  Parse.User.logOut();
   return { type: LOGOUT_USER, payload: null }
 }
 

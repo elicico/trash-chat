@@ -9,6 +9,7 @@ class Composer extends Component {
   constructor(props) {
     super(props)
     this.state = { value: "" }
+    console.log(this.state.value)
   }
 
   handleChange(e) {
@@ -16,7 +17,8 @@ class Composer extends Component {
   }
 
   handleKeyDown(e) {
-    if (e.keyCode === 13) {
+    if (e.keyCode === 13 && (this.state.value !== "" && this.state.value !== "\n")) {
+      e.preventDefault();
       this.props.dispatch(sendMessage(this.state.value, this.props.currentRoomId, this.props.activeUserId))
       this.setState({ value: "" })
     }
@@ -27,7 +29,6 @@ class Composer extends Component {
     return (
       <div className="composer">
         <Textarea
-          minRows={1}
           maxRows={5}
           placeholder="type your message here"
           className="composer__textarea scrollbar"

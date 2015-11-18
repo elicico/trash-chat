@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux'
-import { FETCH_ROOMS_PENDING, FETCH_ROOMS_SUCCESS, FETCH_MESSAGES_PENDING, FETCH_MESSAGES_SUCCESS, CHANGE_ROOM, FETCH_USERS_PENDING, FETCH_USERS_SUCCESS, SEND_MESSAGE_SUCCESS, ADD_ROOM_PENDING, ADD_ROOM_SUCCESS, TOGGLE_MODAL_VISIBILITY, SIGNUP_USER_PENDING, SIGNUP_USER_SUCCESS, LOGIN_USER_PENDING, LOGIN_USER_SUCCESS, LOGOUT_USER } from '../actions/actions'
+import { FETCH_ROOMS_PENDING, FETCH_ROOMS_SUCCESS, FETCH_MESSAGES_PENDING, FETCH_MESSAGES_SUCCESS, CHANGE_ROOM, FETCH_USERS_PENDING, FETCH_USERS_SUCCESS, SEND_MESSAGE_SUCCESS, ADD_ROOM_PENDING, ADD_ROOM_SUCCESS, TOGGLE_MODAL_VISIBILITY, SIGNUP_USER_PENDING, SIGNUP_USER_SUCCESS, LOGIN_USER_PENDING, LOGIN_USER_SUCCESS, LOGOUT_USER, FETCH_USER_PENDING, FETCH_USER_SUCCESS, FETCH_MESSAGE_PENDING, FETCH_MESSAGE_SUCCESS, FETCH_ROOM_PENDING, FETCH_ROOM_SUCCESS } from '../actions/actions'
 
 function currentRoomId(state = null, action) {
   switch (action.type) {
@@ -57,6 +57,25 @@ function messages(
           records
         }
 
+      case FETCH_MESSAGE_SUCCESS:
+
+        let records = state.records
+        let message = action.payload
+
+          records[message.id] = {
+            createdAt: message.createdAt,
+            message: message.get("message"),
+            objectId: message.id,
+            userId: message.get("user").id,
+            roomId: message.get("room").id
+          }
+
+        return {
+          ...state,
+          pending: false,
+          records
+        }
+
       case SEND_MESSAGE_SUCCESS:
 
         var records = state.records;
@@ -105,7 +124,7 @@ function users(
           pending: false,
           records
         }
-      case SIGNUP_USER_SUCCESS:
+      case FETCH_USER_SUCCESS:
         var records = state.records
         let user = action.payload
 
@@ -159,6 +178,21 @@ function rooms(
           records
         }
 
+      case FETCH_ROOM_SUCCESS:
+        var records = state.records
+        let newroom = action.payload;
+
+        records[newroom.id] = {
+          objectId: newroom.id,
+          name: newroom.get("name")
+        }
+
+        return {
+          ...state,
+          pending: false,
+          records
+        }
+
       case ADD_ROOM_SUCCESS:
         var records = state.records
         let room = action.payload;
@@ -181,8 +215,6 @@ function rooms(
 
 function activeUserId(state = null, action) {
     switch (action.type) {
-      case SIGNUP_USER_SUCCESS:
-        return action.payload.id;
       case LOGIN_USER_SUCCESS:
         return action.payload.id;
       case LOGOUT_USER:

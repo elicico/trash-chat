@@ -23,11 +23,13 @@ class App extends Component {
   handleSignupClick(e) {
     e.preventDefault()
     this.props.dispatch(signupUser(this.state.username, this.state.password))
+    this.setState({ username: "", password: "" })
   }
 
   handleLoginClick(e) {
     e.preventDefault()
     this.props.dispatch(logUser(this.state.username, this.state.password))
+    this.setState({ username: "", password: "" })
   }
 
   render() {

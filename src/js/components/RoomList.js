@@ -1,7 +1,8 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import cNames from 'classnames'
-import { fetchRooms, changeRoom, fetchUsers, addRoom, toggleRoomModalVisibility, logout } from '../actions/actions'
+import { fetchRooms, changeRoom, fetchUsers, addRoom, toggleRoomModalVisibility, logout, fetchRoom } from '../actions/actions'
+import pusherChannel from '../pusherChannel'
 import Modal from "./Modal"
 
 class RoomList extends Component {
@@ -15,6 +16,10 @@ class RoomList extends Component {
   componentDidMount() {
     this.props.dispatch(fetchRooms())
     this.props.dispatch(fetchUsers())
+
+    pusherChannel.bind('roomAdded', (object) => {
+      this.props.dispatch(fetchRoom(object.roomId))
+    });
   }
 
   openModal(e) {
@@ -56,7 +61,7 @@ class RoomList extends Component {
     } else {
       return (
         <div className="roomList">
-        <ul className="roomList__ul">{ this.props.rooms.map(this.renderRoom) }</ul>
+        <ul className="roomList__ul scrollbar">{ this.props.rooms.map(this.renderRoom) }</ul>
         <button
           className="button roomList__addRoom"
           onClick={ this.openModal.bind(this) }
