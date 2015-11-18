@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import cNames from 'classnames'
-import { fetchRooms, changeRoom, fetchUsers, addRoom, toggleRoomModalVisibility } from '../actions/actions'
+import { fetchRooms, changeRoom, fetchUsers, addRoom, toggleRoomModalVisibility, logout } from '../actions/actions'
 import Modal from "./Modal"
 
 class RoomList extends Component {
@@ -38,6 +38,11 @@ class RoomList extends Component {
     }
   }
 
+  handleLogoutClick(e) {
+    e.preventDefault()
+    this.props.dispatch(logout(this.props.activeUserId))
+  }
+
   handleClick(roomId, e) {
     e.preventDefault()
     this.props.dispatch(changeRoom(roomId))
@@ -58,10 +63,21 @@ class RoomList extends Component {
           >
           add room
         </button>
+        <button
+          className="button roomList__logout"
+          onClick={ this.handleLogoutClick.bind(this) }
+          >
+          log out
+        </button>
         { this.props.roomModalIsOpen && (
           <Modal
-            onClose={ this.closeModal.bind(this) }
             >
+            <button
+              className="modal__close-button"
+              onClick={ this.closeModal.bind(this) }
+              >
+              close
+            </button>
             <input
               type='text'
               placeholder="new room name here"
@@ -96,13 +112,14 @@ class RoomList extends Component {
 }
 
 function mapStateToProps(state) {
-  const { currentRoomId, rooms, roomModalIsOpen } = state
+  const { currentRoomId, rooms, roomModalIsOpen, activeUserId } = state
 
   return {
     pending: rooms.pending,
     rooms: Object.values(rooms.records),
     roomId: currentRoomId,
-    roomModalIsOpen: roomModalIsOpen.roomModalIsOpen
+    roomModalIsOpen: roomModalIsOpen.roomModalIsOpen,
+    activeUserId
   }
 }
 

@@ -12,9 +12,6 @@ class App extends Component {
     this.state = { username: "", password: "" }
   }
 
-  closeModal() {
-  }
-
   handleUsernameChange(e) {
     this.setState({ username: e.target.value })
   }
@@ -41,7 +38,6 @@ class App extends Component {
         <Composer />
         { this.props.appModalIsOpen && (
           <Modal
-            onClose={ this.closeModal.bind(this) }
             >
             <input
               type='text'

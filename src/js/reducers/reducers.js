@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux'
-import { FETCH_ROOMS_PENDING, FETCH_ROOMS_SUCCESS, FETCH_MESSAGES_PENDING, FETCH_MESSAGES_SUCCESS, CHANGE_ROOM, FETCH_USERS_PENDING, FETCH_USERS_SUCCESS, SEND_MESSAGE_SUCCESS, ADD_ROOM_PENDING, ADD_ROOM_SUCCESS, TOGGLE_MODAL_VISIBILITY, SIGNUP_USER_PENDING, SIGNUP_USER_SUCCESS } from '../actions/actions'
+import { FETCH_ROOMS_PENDING, FETCH_ROOMS_SUCCESS, FETCH_MESSAGES_PENDING, FETCH_MESSAGES_SUCCESS, CHANGE_ROOM, FETCH_USERS_PENDING, FETCH_USERS_SUCCESS, SEND_MESSAGE_SUCCESS, ADD_ROOM_PENDING, ADD_ROOM_SUCCESS, TOGGLE_MODAL_VISIBILITY, SIGNUP_USER_PENDING, SIGNUP_USER_SUCCESS, LOGIN_USER_PENDING, LOGIN_USER_SUCCESS, LOGOUT_USER } from '../actions/actions'
 
 function currentRoomId(state = null, action) {
   switch (action.type) {
@@ -183,6 +183,10 @@ function activeUserId(state = null, action) {
     switch (action.type) {
       case SIGNUP_USER_SUCCESS:
         return action.payload.id;
+      case LOGIN_USER_SUCCESS:
+        return action.payload.id;
+      case LOGOUT_USER:
+        return action.payload;
       default:
         return state;
     }

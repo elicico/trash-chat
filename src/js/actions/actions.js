@@ -29,6 +29,12 @@ export const SIGNUP_USER_PENDING = 'SIGNUP_USER_PENDING'
 export const SIGNUP_USER_SUCCESS = 'SIGNUP_USER_SUCCESS'
 export const SIGNUP_USER_FAIL = 'SIGNUP_USER_FAIL'
 
+export const LOGIN_USER_PENDING = 'LOGIN_USER_PENDING'
+export const LOGIN_USER_SUCCESS = 'LOGIN_USER_SUCCESS'
+export const LOGIN_USER_FAIL = 'LOGIN_USER_FAIL'
+
+export const LOGOUT_USER = 'LOGOUT_USER'
+
 
 const Room = Parse.Object.extend("Room");
 const User = Parse.Object.extend("_User");
@@ -175,4 +181,24 @@ export function signupUser(username, password) {
 
 export function setActiveUser(user) {
   return { type: SIGNUP_USER_SUCCESS, payload: user };
+}
+
+export function logout(activeUser) {
+  return { type: LOGOUT_USER, payload: null }
+}
+
+export function logUser(username, password) {
+  return function(dispatch, getState) {
+    dispatch({ type: LOGIN_USER_PENDING })
+
+    Parse.User.logIn(username, password).then(
+      result => {
+        dispatch({ type: LOGIN_USER_SUCCESS, payload: result })
+      },
+      (model, error) => {
+        dispatch({ type: LOGIN_USER_FAIL, payload: error })
+      }
+    );
+
+  }
 }

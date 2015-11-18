@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import Parse from 'parse'
+import Textarea from 'react-textarea-autosize'
 
 import { sendMessage } from "../actions/actions"
 
@@ -25,10 +26,11 @@ class Composer extends Component {
     const { currentRoomId } = this.props
     return (
       <div className="composer">
-        <input
-          type='text'
+        <Textarea
+          minRows={1}
+          maxRows={5}
           placeholder="type your message here"
-          className="composer__input"
+          className="composer__textarea scrollbar"
           value={ this.state.value }
           onChange={ this.handleChange.bind(this) }
           onKeyDown={ this.handleKeyDown.bind(this) }

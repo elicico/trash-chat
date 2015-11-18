@@ -46,7 +46,7 @@ class MessageList extends Component {
     const { messages } = this.props
     return (
       <ul
-        className="messageList"
+        className="messageList scrollbar"
         ref="messageList"
         on
         >
