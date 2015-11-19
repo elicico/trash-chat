@@ -24,9 +24,6 @@ class MessageList extends Component {
     pusherChannel.bind('userSignup', (object) => {
       this.props.dispatch(fetchUser(object.userId))
     });
-
-    let node = this.refs.messageList
-    this.shouldScrollBottom = node.scrollTop + node.offsetHeight === node.scrollHeight
   }
 
   componentWillReceiveProps(newProps) {
@@ -35,13 +32,8 @@ class MessageList extends Component {
     }
   }
 
-  componentWillUpdate() {
-    let node = this.refs.messageList
-    this.shouldScrollBottom = node.scrollTop + node.offsetHeight === node.scrollHeight
-  }
-
   componentDidUpdate() {
-    let node = this.refs.messageList
+    var node = this.refs.messageList
     node.scrollTop = node.scrollHeight
   }
 
@@ -51,7 +43,6 @@ class MessageList extends Component {
       <ul
         className="messageList scrollbar"
         ref="messageList"
-        on
         >
         { messages.map(this.renderMessage) }
       </ul>

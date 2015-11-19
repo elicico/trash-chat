@@ -17,10 +17,12 @@ class Composer extends Component {
   }
 
   handleKeyDown(e) {
-    if (e.keyCode === 13 && (this.state.value !== "" && this.state.value !== "\n")) {
+    if (e.keyCode === 13) {
       e.preventDefault();
-      this.props.dispatch(sendMessage(this.state.value, this.props.currentRoomId, this.props.activeUserId))
-      this.setState({ value: "" })
+      if (this.state.value.trim().length > 0) {
+        this.props.dispatch(sendMessage(this.state.value, this.props.currentRoomId, this.props.activeUserId))
+        this.setState({ value: "" })
+      }
     }
   }
 

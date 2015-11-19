@@ -96,6 +96,39 @@ export function fetchRoom(roomAdded) {
   }
 }
 
+export function addRoom(newRoom) {
+  return function(dispatch, getState) {
+    dispatch({ type: ADD_ROOM_PENDING })
+
+    let room = new Room()
+    room.set("name", newRoom)
+    room.save().then(
+      result => {
+        pushEvent("roomAdded", { roomId: result.id });
+        dispatch({ type: ADD_ROOM_SUCCESS, payload: result })
+      },
+      (model, error) => {
+        dispatch({ type: ADD_ROOM_FAIL, payload: error })
+      }
+    )
+  }
+}
+
+export function toggleRoomModalVisibility(roomModalIsOpen) {
+  let payload = { roomModalIsOpen }
+
+  return function(dispatch, getState) {
+    dispatch({ type: TOGGLE_MODAL_VISIBILITY, payload })
+  }
+}
+
+export function changeRoom(roomId) {
+  return {
+    type: CHANGE_ROOM,
+    payload: roomId
+  }
+}
+
 export function fetchMessages(roomId) {
   return function(dispatch, getState) {
     dispatch({ type: FETCH_MESSAGES_PENDING })
@@ -131,14 +164,6 @@ export function fetchMessage(messageId) {
     )
   }
 }
-
-export function changeRoom(roomId) {
-  return {
-    type: CHANGE_ROOM,
-    payload: roomId
-  }
-}
-
 
 export function fetchUsers() {
   return function(dispatch, getState) {
@@ -190,36 +215,10 @@ export function sendMessage(message, roomId, userId) {
         pushEvent("messageSent", { messageId: result.id });
         dispatch({ type: SEND_MESSAGE_SUCCESS, payload: result })
       },
-      (model, error) => {
+      (error) => {
         dispatch({ type: SEND_MESSAGE_FAIL, payload: error })
       }
     );
-  }
-}
-
-export function addRoom(newRoom) {
-  return function(dispatch, getState) {
-    dispatch({ type: ADD_ROOM_PENDING })
-
-    let room = new Room()
-    room.set("name", newRoom)
-    room.save().then(
-      result => {
-        pushEvent("roomAdded", { roomId: result.id });
-        dispatch({ type: ADD_ROOM_SUCCESS, payload: result })
-      },
-      (model, error) => {
-        dispatch({ type: ADD_ROOM_FAIL, payload: error })
-      }
-    )
-  }
-}
-
-export function toggleRoomModalVisibility(roomModalIsOpen) {
-  let payload = { roomModalIsOpen }
-
-  return function(dispatch, getState) {
-    dispatch({ type: TOGGLE_MODAL_VISIBILITY, payload })
   }
 }
 
@@ -230,14 +229,16 @@ export function signupUser(username, password) {
     var user = new Parse.User()
     user.set("username", username)
     user.set("password", password)
-    user.signUp().then(
+
+    return user.signUp().then(
       result => {
         pushEvent("userSignup", { userId: result.id });
         dispatch({ type: LOGIN_USER_SUCCESS, payload: result })
         dispatch({ type: FETCH_USER_SUCCESS, payload: result })
       },
-      (model, error) => {
+      (error) => {
         dispatch({ type: SIGNUP_USER_FAIL, payload: error })
+        return error;
       }
     )
   }
@@ -256,12 +257,13 @@ export function logUser(username, password) {
   return function(dispatch, getState) {
     dispatch({ type: LOGIN_USER_PENDING })
 
-    Parse.User.logIn(username, password).then(
+    return Parse.User.logIn(username, password).then(
       result => {
         dispatch({ type: LOGIN_USER_SUCCESS, payload: result })
       },
-      (model, error) => {
+      (error) => {
         dispatch({ type: LOGIN_USER_FAIL, payload: error })
+        return error
       }
     );
 

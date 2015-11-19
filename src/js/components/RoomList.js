@@ -10,12 +10,11 @@ class RoomList extends Component {
     super(props)
     this.handleClick = this.handleClick.bind(this)
     this.renderRoom = this.renderRoom.bind(this)
-    this.state = { value: "" }
+    this.state = { value: "", roomNameError: false }
   }
 
   componentDidMount() {
     this.props.dispatch(fetchRooms())
-    this.props.dispatch(fetchUsers())
 
     pusherChannel.bind('roomAdded', (object) => {
       this.props.dispatch(fetchRoom(object.roomId))
@@ -31,15 +30,26 @@ class RoomList extends Component {
     this.setState({ value: "" })
   }
 
+  closeErrorModal() {
+    this.setState({ value: "", roomNameError: false })
+  }
+
   handleModalChange(e) {
     this.setState({ value: e.target.value })
   }
 
   handleModalKeyDown(e) {
     if (e.keyCode === 13) {
-      this.props.dispatch(addRoom(this.state.value))
-      this.props.dispatch(toggleRoomModalVisibility(false))
-      this.setState({ value: "" })
+      let isRoomNameTaken = this.props.rooms.find( room => room.name.toLowerCase().trim() === this.state.value.toLowerCase().trim() )
+      if (isRoomNameTaken) {
+        this.setState({ roomNameError: "This room name already esists (」゜ロ゜)」" })
+      } else if (this.state.value.trim().length === 0) {
+        this.setState({ roomNameError: "A blank named room? Pls stahp." })
+      } else {
+        this.props.dispatch(addRoom(this.state.value))
+        this.props.dispatch(toggleRoomModalVisibility(false))
+        this.setState({ value: "" })
+      }
     }
   }
 
@@ -75,8 +85,7 @@ class RoomList extends Component {
           log out
         </button>
         { this.props.roomModalIsOpen && (
-          <Modal
-            >
+          <Modal>
             <button
               className="modal__close-button"
               onClick={ this.closeModal.bind(this) }
@@ -91,6 +100,21 @@ class RoomList extends Component {
               onChange={ this.handleModalChange.bind(this) }
               onKeyDown={ this.handleModalKeyDown.bind(this) }
             />
+          </Modal>
+        ) }
+        { this.state.roomNameError && (
+          <Modal>
+            <button
+              className="modal__close-button"
+              onClick={ this.closeErrorModal.bind(this) }
+              >
+              close
+            </button>
+            <div
+              className="modal__error-message"
+              >
+               { this.state.roomNameError }
+            </div>
           </Modal>
         ) }
         </div>

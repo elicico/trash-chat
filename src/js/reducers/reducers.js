@@ -109,7 +109,7 @@ function users(
       case FETCH_USERS_PENDING:
         return { ...state, pending: true }
       case FETCH_USERS_SUCCESS:
-        var records = {}
+        var records = state.records
 
         for (let i=0; i<action.payload.length; i++) {
           let user = action.payload[i];

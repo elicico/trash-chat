@@ -1,0 +1,10 @@
+{
+  "applications": {
+    "Chat": {
+      "applicationId": "X7EtnKlIJ1bOE5EBELVGUuKg5vC5f5k1xNSyDq66"
+    },
+    "_default": {
+      "link": "Chat"
+    }
+  }
+}
