@@ -129,16 +129,25 @@ export function changeRoom(roomId) {
   }
 }
 
-export function fetchMessages(roomId) {
+export function fetchMoreMessages(currentRoomId) {
   return function(dispatch, getState) {
     dispatch({ type: FETCH_MESSAGES_PENDING })
 
+    let messages = Object.values(getState().messages.records)
+      .filter(({ roomId }) => roomId === currentRoomId )
+      .sort(({ createdAt: a }, { createdAt: b }) => a - b)
+
     var messageQuery = new Parse.Query(Message)
     var room = new Room()
-    room.id = roomId
+    room.id = currentRoomId
     messageQuery.equalTo("room", room)
-    messageQuery.limit(1000)
-    messageQuery.find().then(
+    messageQuery.descending("createdAt")
+    messageQuery.limit(10)
+
+    if (messages.length !== 0) {
+      messageQuery.lessThan("createdAt", messages[0].createdAt)
+    }
+    return messageQuery.find().then(
       messages => {
         dispatch({ type: FETCH_MESSAGES_SUCCESS, payload: messages })
       },

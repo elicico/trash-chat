@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux'
-import { FETCH_ROOMS_PENDING, FETCH_ROOMS_SUCCESS, FETCH_MESSAGES_PENDING, FETCH_MESSAGES_SUCCESS, CHANGE_ROOM, FETCH_USERS_PENDING, FETCH_USERS_SUCCESS, SEND_MESSAGE_SUCCESS, ADD_ROOM_PENDING, ADD_ROOM_SUCCESS, TOGGLE_MODAL_VISIBILITY, SIGNUP_USER_PENDING, SIGNUP_USER_SUCCESS, LOGIN_USER_PENDING, LOGIN_USER_SUCCESS, LOGOUT_USER, FETCH_USER_PENDING, FETCH_USER_SUCCESS, FETCH_MESSAGE_PENDING, FETCH_MESSAGE_SUCCESS, FETCH_ROOM_PENDING, FETCH_ROOM_SUCCESS } from '../actions/actions'
+import { FETCH_ROOMS_PENDING, FETCH_ROOMS_SUCCESS, FETCH_MESSAGES_PENDING, FETCH_MESSAGES_SUCCESS, CHANGE_ROOM, FETCH_USERS_PENDING, FETCH_USERS_SUCCESS, SEND_MESSAGE_SUCCESS, ADD_ROOM_PENDING, ADD_ROOM_SUCCESS, TOGGLE_MODAL_VISIBILITY, SIGNUP_USER_PENDING, SIGNUP_USER_SUCCESS, LOGIN_USER_PENDING, LOGIN_USER_SUCCESS, LOGOUT_USER, FETCH_USER_PENDING, FETCH_USER_SUCCESS, FETCH_MESSAGE_PENDING, FETCH_MESSAGE_SUCCESS, FETCH_ROOM_PENDING, FETCH_ROOM_SUCCESS, SIGNUP_USER_FAIL } from '../actions/actions'
 
 function currentRoomId(state = null, action) {
   switch (action.type) {
@@ -101,6 +101,7 @@ function messages(
 
 function users(
   state = {
+    signupPending: false,
     pending: false,
     error: null,
     records: {}
@@ -108,6 +109,13 @@ function users(
     switch (action.type) {
       case FETCH_USERS_PENDING:
         return { ...state, pending: true }
+
+      case SIGNUP_USER_PENDING:
+        return { ...state, signupPending: true }
+
+      case SIGNUP_USER_FAIL:
+        return { ...state, signupPending: false }
+
       case FETCH_USERS_SUCCESS:
         var records = state.records
 
@@ -121,6 +129,7 @@ function users(
 
         return {
           ...state,
+          signupPending: false,
           pending: false,
           records
         }
@@ -135,6 +144,7 @@ function users(
 
         return {
           ...state,
+          signupPending: false,
           records
         }
       default:
@@ -152,15 +162,6 @@ function rooms(
       case FETCH_ROOMS_PENDING:
         return { ...state, pending: true }
       case FETCH_ROOMS_SUCCESS:
-
-        // let records = action.payload.reduce((previousReturn, room) => {
-        //   previousReturn[room.id] = {
-        //     objectId: room.id,
-        //     name: room.get("name")
-        //   };
-        //   return previousReturn;
-        // }, {})
-
         var records = {};
 
         for (let i=0; i<action.payload.length; i++) {

@@ -1,9 +1,11 @@
 import React, { Component, PropTypes } from 'react'
+import ReactDOM from 'react-dom'
 import { connect } from 'react-redux'
 import cNames from 'classnames'
-import { fetchMessages, fetchUsers, fetchUser, fetchMessage } from '../actions/actions'
+import { fetchMoreMessages, fetchUsers, fetchUser, fetchMessage } from '../actions/actions'
 import pusherChannel from '../pusherChannel'
 import Parse from 'parse'
+import InfiniteScroll from './InfiniteScroll'
 
 class MessageList extends Component {
   constructor(props) {
@@ -13,7 +15,7 @@ class MessageList extends Component {
 
   componentDidMount() {
     if (this.props.roomId) {
-      this.props.dispatch(fetchMessages(this.props.roomId))
+      this.props.dispatch(fetchMoreMessages(this.props.roomId))
     }
     this.props.dispatch(fetchUsers())
 
@@ -28,24 +30,54 @@ class MessageList extends Component {
 
   componentWillReceiveProps(newProps) {
     if (newProps.roomId && newProps.roomId !== this.props.roomId) {
-      this.props.dispatch(fetchMessages(newProps.roomId))
+      this.props.dispatch(fetchMoreMessages(newProps.roomId))
+      this.shouldScrollBottom = true
+    }
+
+    if (this.props.messages.length === 0 && newProps.messages.length > 0) {
+      this.shouldScrollBottom = true
+    }
+
+    var node = ReactDOM.findDOMNode(this.refs.messageList)
+    if (
+      this.props.messages.length > 0 &&
+      newProps.messages.length > 0 &&
+      newProps.messages.length !== this.props.messages.length &&
+      node.scrollTop + node.offsetHeight === node.scrollHeight
+    ) {
+      this.shouldScrollBottom = true
     }
   }
 
   componentDidUpdate() {
-    var node = this.refs.messageList
-    node.scrollTop = node.scrollHeight
+    if (this.shouldScrollBottom) {
+      var node = ReactDOM.findDOMNode(this.refs.messageList)
+      node.scrollTop = node.scrollHeight
+      this.shouldScrollBottom = false
+    }
+  }
+
+  handleTopReached() {
+    var node = ReactDOM.findDOMNode(this.refs.messageList)
+    let oldScrollHeight = node.scrollHeight
+    this.props.dispatch(fetchMoreMessages(this.props.roomId))
+    .then(() => {
+      let newScrollHeight = node.scrollHeight
+      node.scrollTop = newScrollHeight - oldScrollHeight
+    })
   }
 
   render() {
     const { messages } = this.props
     return (
-      <ul
+      <InfiniteScroll
         className="messageList scrollbar"
         ref="messageList"
+        tagName="ul"
+        onTopReached={ this.handleTopReached.bind(this) }
         >
         { messages.map(this.renderMessage) }
-      </ul>
+      </InfiniteScroll>
     )
   }
 

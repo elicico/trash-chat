@@ -28,8 +28,8 @@ class App extends Component {
     e.preventDefault()
     this.props.dispatch(signupUser(this.state.username, this.state.password))
     .then(
-      () => this.setState({ username: "", password: "" }),
-      (error) => this.setState({ logError: error.message })
+      () => this.setState({ username: "", password: ""}),
+      (error) => this.setState({ logError: error.message})
     )
   }
 
@@ -64,7 +64,7 @@ class App extends Component {
               onChange={ this.handleUsernameChange.bind(this) }
             />
             <input
-              type='text'
+              type='password'
               placeholder="password"
               className="modal__input modal__input--password"
               value={ this.state.password }
@@ -72,6 +72,7 @@ class App extends Component {
             />
           <button
             className="button app__signup"
+            disabled={ this.props.userSignupPending }
             onClick={ this.handleSignupClick.bind(this) }
             >
             sign up
@@ -99,6 +100,17 @@ class App extends Component {
               </div>
             </Modal>
           ) }
+
+          { this.props.userSignupPending && (
+            <div className="modal">
+              <div className="sk-folding-cube">
+                <div className="sk-cube1 sk-cube"></div>
+                <div className="sk-cube2 sk-cube"></div>
+                <div className="sk-cube4 sk-cube"></div>
+                <div className="sk-cube3 sk-cube"></div>
+              </div>
+            </div>
+          ) }
       </div>
     )
   }
@@ -109,7 +121,8 @@ function mapStateToProps(state) {
 
   return {
     appModalIsOpen: !activeUserId,
-    users : Object.values(users.records)
+    users : Object.values(users.records),
+    userSignupPending : users.signupPending
   }
 }
 

@@ -9,7 +9,6 @@ class Composer extends Component {
   constructor(props) {
     super(props)
     this.state = { value: "" }
-    console.log(this.state.value)
   }
 
   handleChange(e) {
