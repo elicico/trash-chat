@@ -1,229 +1,229 @@
 import { combineReducers } from 'redux'
-import { FETCH_ROOMS_PENDING, FETCH_ROOMS_SUCCESS, FETCH_MESSAGES_PENDING, FETCH_MESSAGES_SUCCESS, CHANGE_ROOM, FETCH_USERS_PENDING, FETCH_USERS_SUCCESS, SEND_MESSAGE_SUCCESS, ADD_ROOM_PENDING, ADD_ROOM_SUCCESS, TOGGLE_MODAL_VISIBILITY, SIGNUP_USER_PENDING, SIGNUP_USER_SUCCESS, LOGIN_USER_PENDING, LOGIN_USER_SUCCESS, LOGOUT_USER, FETCH_USER_PENDING, FETCH_USER_SUCCESS, FETCH_MESSAGE_PENDING, FETCH_MESSAGE_SUCCESS, FETCH_ROOM_PENDING, FETCH_ROOM_SUCCESS, SIGNUP_USER_FAIL } from '../actions/actions'
+import { createAction, createReducer } from 'redux-act'
+import { logoutUser, toggleModalVisibility, changeRoom } from '../actions/actions'
+import {
+  fetchRoomsPending,
+  fetchRoomsSuccess,
+  fetchRoomsFail,
+  fetchMessagesPending,
+  fetchMessagesSuccess,
+  fetchMessagesFail,
+  fetchUsersPending,
+  fetchUsersSuccess,
+  fetchUsersFail,
+  sendMessagePending,
+  sendMessageSuccess,
+  sendMessageFail,
+  addRoomPending,
+  addRoomSuccess,
+  addRoomFail,
+  signupUserPending,
+  signupUserSuccess,
+  signupUserFail,
+  loginUserPending,
+  loginUserSuccess,
+  loginUserFail,
+  fetchUserPending,
+  fetchUserSuccess,
+  fetchUserFail,
+  fetchMessagePending,
+  fetchMessageSuccess,
+  fetchMessageFail,
+  fetchRoomPending,
+  fetchRoomSuccess,
+  fetchRoomFail
+} from '../actions/actions'
 
-function currentRoomId(state = null, action) {
-  switch (action.type) {
-    case FETCH_ROOMS_SUCCESS:
-      return action.payload[0].id
-    case CHANGE_ROOM:
-      return action.payload
-    default:
-      return state
+var currentRoomId = createReducer({
+  [ fetchRoomsSuccess ]: (state, payload) => payload[0].id,
+  [ changeRoom ]: (state, payload) => payload
+}, null)
+
+var modal = createReducer({
+  [ toggleModalVisibility ]: (state, payload) => {
+    return { ...state, roomModalIsOpen: payload }
   }
-}
+},
+{ roomModalIsOpen: false } )
 
-function modal(
-  state = {
-    roomModalIsOpen: false
-  }, action) {
-    switch (action.type) {
-      case TOGGLE_MODAL_VISIBILITY:
-        return {
-          ...state,
-          roomModalIsOpen: action.payload.roomModalIsOpen
-          }
-      default:
-        return state
+var messages = createReducer({
+  [ fetchMessagesPending ]: (state, payload) => {
+    return { ...state, pending: true }
+  },
+  [ fetchMessagesSuccess ]: (state, payload) => {
+    var records = state.records;
+
+    for (let i=0; i<payload.length; i++) {
+      let message = payload[i];
+      records[message.id] = {
+        createdAt: message.createdAt,
+        message: message.get("message"),
+        objectId: message.id,
+        userId: message.get("user").id,
+        roomId: message.get("room").id
+      };
+    }
+
+    return {
+      ...state,
+      pending: false,
+      records
+    }
+  },
+  [ fetchMessageSuccess ]: (state, payload) => {
+    let records = state.records
+    let message = payload
+
+      records[message.id] = {
+        createdAt: message.createdAt,
+        message: message.get("message"),
+        objectId: message.id,
+        userId: message.get("user").id,
+        roomId: message.get("room").id
+      }
+
+    return {
+      ...state,
+      pending: false,
+      records
+    }
+  },
+  [ sendMessageSuccess ]: (state, payload) => {
+    var records = state.records;
+
+    records[payload.id] = {
+      createdAt: payload.createdAt,
+      message: payload.get("message"),
+      objectId: payload.id,
+      userId: payload.get("user").id,
+      roomId: payload.get("room").id
+    };
+
+    return {
+      ...state,
+      pending: false,
+      records
     }
   }
+}, {
+  pending: false,
+  error: null,
+  records: {}
+} )
 
-function messages(
-  state = {
-    pending: false,
-    error: null,
-    records: {}
-  }, action) {
-    switch (action.type) {
-      case FETCH_MESSAGES_PENDING:
-        return { ...state, pending: true }
-      case FETCH_MESSAGES_SUCCESS:
+var users = createReducer({
+  [ fetchUsersPending ]: (state, payload) => {
+    return { ...state, pending: true }
+  },
+  [ fetchUsersSuccess ]: (state, payload) => {
+    var records = state.records
 
-        var records = state.records;
-
-        for (let i=0; i<action.payload.length; i++) {
-          let message = action.payload[i];
-          records[message.id] = {
-            createdAt: message.createdAt,
-            message: message.get("message"),
-            objectId: message.id,
-            userId: message.get("user").id,
-            roomId: message.get("room").id
-          };
-        }
-
-        return {
-          ...state,
-          pending: false,
-          records
-        }
-
-      case FETCH_MESSAGE_SUCCESS:
-
-        let records = state.records
-        let message = action.payload
-
-          records[message.id] = {
-            createdAt: message.createdAt,
-            message: message.get("message"),
-            objectId: message.id,
-            userId: message.get("user").id,
-            roomId: message.get("room").id
-          }
-
-        return {
-          ...state,
-          pending: false,
-          records
-        }
-
-      case SEND_MESSAGE_SUCCESS:
-
-        var records = state.records;
-
-        records[action.payload.id] = {
-          createdAt: action.payload.createdAt,
-          message: action.payload.get("message"),
-          objectId: action.payload.id,
-          userId: action.payload.get("user").id,
-          roomId: action.payload.get("room").id
-        };
-
-        return {
-          ...state,
-          pending: false,
-          records
-        }
-
-      default:
-        return state
-  }
-}
-
-function users(
-  state = {
-    signupPending: false,
-    pending: false,
-    error: null,
-    records: {}
-  }, action) {
-    switch (action.type) {
-      case FETCH_USERS_PENDING:
-        return { ...state, pending: true }
-
-      case SIGNUP_USER_PENDING:
-        return { ...state, signupPending: true }
-
-      case SIGNUP_USER_FAIL:
-        return { ...state, signupPending: false }
-
-      case FETCH_USERS_SUCCESS:
-        var records = state.records
-
-        for (let i=0; i<action.payload.length; i++) {
-          let user = action.payload[i];
-          records[user.id] = {
-            objectId: user.id,
-            username: user.get("username")
-          }
-        }
-
-        return {
-          ...state,
-          signupPending: false,
-          pending: false,
-          records
-        }
-      case FETCH_USER_SUCCESS:
-        var records = state.records
-        let user = action.payload
-
-        records[user.id] = {
-          objectId: user.id,
-          username: user.get("username")
-        }
-
-        return {
-          ...state,
-          signupPending: false,
-          records
-        }
-      default:
-        return state;
+    for (let i=0; i<payload.length; i++) {
+      let user = payload[i];
+      records[user.id] = {
+        objectId: user.id,
+        username: user.get("username")
+      }
     }
-}
 
-function rooms(
-  state = {
-    pending: false,
-    error: null,
-    records: {}
-  }, action) {
-    switch (action.type) {
-      case FETCH_ROOMS_PENDING:
-        return { ...state, pending: true }
-      case FETCH_ROOMS_SUCCESS:
-        var records = {};
+    return {
+      ...state,
+      signupPending: false,
+      pending: false,
+      records
+    }
+  },
+  [ fetchUserSuccess ]: (state, payload) => {
+    var records = state.records
+    let user = payload
 
-        for (let i=0; i<action.payload.length; i++) {
-          let room = action.payload[i];
+    records[user.id] = {
+      objectId: user.id,
+      username: user.get("username")
+    }
 
-          records[room.id] = {
-            objectId: room.id,
-            name: room.get("name")
-          };
-        }
-
-        return {
-          ...state,
-          pending: false,
-          records
-        }
-
-      case FETCH_ROOM_SUCCESS:
-        var records = state.records
-        let newroom = action.payload;
-
-        records[newroom.id] = {
-          objectId: newroom.id,
-          name: newroom.get("name")
-        }
-
-        return {
-          ...state,
-          pending: false,
-          records
-        }
-
-      case ADD_ROOM_SUCCESS:
-        var records = state.records
-        let room = action.payload;
-
-        records[room.id] = {
-          objectId: room.id,
-          name: room.get("name")
-        }
-
-        return {
-          ...state,
-          pending: false,
-          records
-        }
-
-      default:
-        return state
+    return {
+      ...state,
+      signupPending: false,
+      records
+    }
+  },
+  [ signupUserPending ]: (state, pending) => {
+    return { ...state, signupPending: true }
+  },
+  [ signupUserFail ]: (state, pending) => {
+    return { ...state, signupPending: false }
   }
-}
+}, {
+  signupPending: false,
+  pending: false,
+  error: null,
+  records: {}
+} )
 
-function activeUserId(state = null, action) {
-    switch (action.type) {
-      case LOGIN_USER_SUCCESS:
-        return action.payload.id;
-      case LOGOUT_USER:
-        return action.payload;
-      default:
-        return state;
+var rooms = createReducer({
+  [ fetchRoomsPending ]: (state, payload) => {
+    return { ...state, pending: true }
+  },
+  [ fetchRoomsSuccess ]: (state, payload) => {
+    var records = {};
+
+    for (let i=0; i<payload.length; i++) {
+      let room = payload[i];
+
+      records[room.id] = {
+        objectId: room.id,
+        name: room.get("name")
+      };
+    }
+
+    return {
+      ...state,
+      pending: false,
+      records
+    }
+  },
+  [ fetchRoomSuccess ]: (state, payload) => {
+    var records = state.records
+    let newroom = payload;
+
+    records[newroom.id] = {
+      objectId: newroom.id,
+      name: newroom.get("name")
+    }
+
+    return {
+      ...state,
+      pending: false,
+      records
+    }
+  },
+  [ addRoomSuccess ]: (state, payload) => {
+    var records = state.records
+    let room = payload;
+
+    records[room.id] = {
+      objectId: room.id,
+      name: room.get("name")
+    }
+
+    return {
+      ...state,
+      pending: false,
+      records
     }
   }
+}, {
+  pending: false,
+  error: null,
+  records: {}
+} )
+
+
+var activeUserId = createReducer({
+  [ loginUserSuccess ]: (state, payload) => payload.id,
+  [ logoutUser ]: (state, payload) => null
+}, null)
 
 const rootReducer = function(state = {}, action) {
   return {

@@ -6,6 +6,8 @@ import { fetchMoreMessages, fetchUsers, fetchUser, fetchMessage } from '../actio
 import pusherChannel from '../pusherChannel'
 import Parse from 'parse'
 import InfiniteScroll from './InfiniteScroll'
+import ReactEmoji from 'react-emoji'
+import ReactAutolink from 'react-autolink'
 
 class MessageList extends Component {
   constructor(props) {
@@ -96,6 +98,14 @@ class MessageList extends Component {
       'messageList__item__text--right': message.userId === this.props.activeUserId
     })
 
+    var convertedMessage = ReactEmoji.emojify(message.message).map((item) => {
+      if (typeof item === "string") {
+        return ReactAutolink.autolink(item);
+      } else {
+        return item;
+      }
+    });
+
     return(
       <li
         className={ messageClass }
@@ -104,7 +114,7 @@ class MessageList extends Component {
         <div className={ textClass }>
           <span className="messageList__item__text__username">{ users[i].username }</span>
           <br />
-          { message.message }
+          { convertedMessage }
         </div>
       </li>
     )

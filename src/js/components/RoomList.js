@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import cNames from 'classnames'
-import { fetchRooms, changeRoom, fetchUsers, addRoom, toggleRoomModalVisibility, logout, fetchRoom } from '../actions/actions'
+import { fetchRooms, changeRoom, fetchUsers, addRoom, toggleModalVisibility, logoutUser, fetchRoom } from '../actions/actions'
 import pusherChannel from '../pusherChannel'
 import Modal from "./Modal"
 
@@ -22,11 +22,11 @@ class RoomList extends Component {
   }
 
   openModal(e) {
-    this.props.dispatch(toggleRoomModalVisibility(true))
+    this.props.dispatch(toggleModalVisibility(true))
   }
 
   closeModal() {
-    this.props.dispatch(toggleRoomModalVisibility(false))
+    this.props.dispatch(toggleModalVisibility(false))
     this.setState({ value: "" })
   }
 
@@ -47,7 +47,7 @@ class RoomList extends Component {
         this.setState({ roomNameError: "A blank named room? Pls stahp." })
       } else {
         this.props.dispatch(addRoom(this.state.value))
-        this.props.dispatch(toggleRoomModalVisibility(false))
+        this.props.dispatch(toggleModalVisibility(false))
         this.setState({ value: "" })
       }
     }
@@ -55,7 +55,7 @@ class RoomList extends Component {
 
   handleLogoutClick(e) {
     e.preventDefault()
-    this.props.dispatch(logout(this.props.activeUserId))
+    this.props.dispatch(logoutUser())
   }
 
   handleClick(roomId, e) {

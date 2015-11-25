@@ -1,51 +1,47 @@
 import Parse from 'parse'
 import fetch from 'isomorphic-fetch'
+import { createStore } from 'redux'
+import { createAction } from 'redux-act'
 
-export const FETCH_ROOMS_PENDING = 'FETCH_ROOMS_PENDING'
-export const FETCH_ROOMS_SUCCESS = 'FETCH_ROOMS_SUCCESS'
-export const FETCH_ROOMS_FAIL = 'FETCH_ROOMS_FAIL'
+export const fetchRoomsPending = createAction()
+export const fetchRoomsSuccess = createAction()
+export const fetchRoomsFail = createAction()
 
-export const FETCH_MESSAGES_PENDING = 'FETCH_MESSAGES_PENDING'
-export const FETCH_MESSAGES_SUCCESS = 'FETCH_MESSAGES_SUCCESS'
-export const FETCH_MESSAGES_FAIL = 'FETCH_MESSAGES_FAIL'
+export const fetchMessagesPending = createAction()
+export const fetchMessagesSuccess = createAction()
+export const fetchMessagesFail = createAction()
 
-export const CHANGE_ROOM = "CHANGE_ROOM"
+export const fetchUsersPending = createAction()
+export const fetchUsersSuccess = createAction()
+export const fetchUsersFail = createAction()
 
-export const FETCH_USERS_PENDING = 'FETCH_USERS_PENDING'
-export const FETCH_USERS_SUCCESS = 'FETCH_USERS_SUCCESS'
-export const FETCH_USERS_FAIL = 'FETCH_USERS_FAIL'
+export const sendMessagePending = createAction()
+export const sendMessageSuccess = createAction()
+export const sendMessageFail = createAction()
 
-export const SEND_MESSAGE_PENDING = 'SEND_MESSAGE_PENDING'
-export const SEND_MESSAGE_SUCCESS = 'SEND_MESSAGE_SUCCESS'
-export const SEND_MESSAGE_FAIL = 'SEND_MESSAGE_FAIL'
+export const addRoomPending = createAction()
+export const addRoomSuccess = createAction()
+export const addRoomFail = createAction()
 
-export const ADD_ROOM_PENDING = 'ADD_ROOM_PENDING'
-export const ADD_ROOM_SUCCESS = 'ADD_ROOM_SUCCESS'
-export const ADD_ROOM_FAIL = 'ADD_ROOM_FAIL'
+export const signupUserPending = createAction()
+export const signupUserSuccess = createAction()
+export const signupUserFail = createAction()
 
-export const TOGGLE_MODAL_VISIBILITY = 'TOGGLE_MODAL_VISIBILITY'
+export const loginUserPending = createAction()
+export const loginUserSuccess = createAction()
+export const loginUserFail = createAction()
 
-export const SIGNUP_USER_PENDING = 'SIGNUP_USER_PENDING'
-export const SIGNUP_USER_SUCCESS = 'SIGNUP_USER_SUCCESS'
-export const SIGNUP_USER_FAIL = 'SIGNUP_USER_FAIL'
+export const fetchUserPending = createAction()
+export const fetchUserSuccess = createAction()
+export const fetchUserFail = createAction()
 
-export const LOGIN_USER_PENDING = 'LOGIN_USER_PENDING'
-export const LOGIN_USER_SUCCESS = 'LOGIN_USER_SUCCESS'
-export const LOGIN_USER_FAIL = 'LOGIN_USER_FAIL'
+export const fetchMessagePending = createAction()
+export const fetchMessageSuccess = createAction()
+export const fetchMessageFail = createAction()
 
-export const LOGOUT_USER = 'LOGOUT_USER'
-
-export const FETCH_USER_PENDING = 'FETCH_USER_PENDING'
-export const FETCH_USER_SUCCESS = 'FETCH_USER_SUCCESS'
-export const FETCH_USER_FAIL = 'FETCH_USER_FAIL'
-
-export const FETCH_MESSAGE_PENDING = 'FETCH_MESSAGE_PENDING'
-export const FETCH_MESSAGE_SUCCESS = 'FETCH_MESSAGE_SUCCESS'
-export const FETCH_MESSAGE_FAIL = 'FETCH_MESSAGE_FAIL'
-
-export const FETCH_ROOM_PENDING = 'FETCH_ROOM_PENDING'
-export const FETCH_ROOM_SUCCESS = 'FETCH_ROOM_SUCCESS'
-export const FETCH_ROOM_FAIL = 'FETCH_ROOM_FAIL'
+export const fetchRoomPending = createAction()
+export const fetchRoomSuccess = createAction()
+export const fetchRoomFail = createAction()
 
 let pushEvent = function(eventName, payload) {
   payload.eventName = eventName;
@@ -62,19 +58,19 @@ let pushEvent = function(eventName, payload) {
 
 
 const Room = Parse.Object.extend("Room");
-const User = Parse.Object.extend("_User");
+const User = Parse.Object.extend("User");
 const Message = Parse.Object.extend("Message");
 
 export function fetchRooms() {
   return function(dispatch, getState) {
-    dispatch({ type: FETCH_ROOMS_PENDING })
+    dispatch(fetchRoomsPending())
 
     new Parse.Query(Room).find().then(
       rooms => {
-        dispatch({ type: FETCH_ROOMS_SUCCESS, payload: rooms })
+        dispatch(fetchRoomsSuccess(rooms))
       },
       (model, error) => {
-        dispatch({ type: FETCH_ROOMS_FAIL, payload: error })
+        dispatch(fetchRoomsFail(error))
       }
     );
   }
@@ -82,15 +78,15 @@ export function fetchRooms() {
 
 export function fetchRoom(roomAdded) {
   return function(dispatch, getState) {
-    dispatch({ type: FETCH_ROOM_PENDING })
+    dispatch(fetchRoomPending())
 
     let room = new Parse.Query(Room)
     room.get(roomAdded).then(
       room => {
-        dispatch({ type: FETCH_ROOM_SUCCESS, payload: room })
+        dispatch(fetchRoomSuccess(room))
       },
       (model, error) => {
-        dispatch({ type: FETCH_ROOM_FAIL, payload: error })
+        dispatch(fetchRoomFail(error))
       }
     );
   }
@@ -98,40 +94,26 @@ export function fetchRoom(roomAdded) {
 
 export function addRoom(newRoom) {
   return function(dispatch, getState) {
-    dispatch({ type: ADD_ROOM_PENDING })
+    dispatch(addRoomPending())
 
     let room = new Room()
     room.set("name", newRoom)
     room.save().then(
       result => {
         pushEvent("roomAdded", { roomId: result.id });
-        dispatch({ type: ADD_ROOM_SUCCESS, payload: result })
+        dispatch(addRoomSuccess(result))
       },
       (model, error) => {
-        dispatch({ type: ADD_ROOM_FAIL, payload: error })
+        dispatch(addRoomFail(error))
       }
     )
   }
 }
 
-export function toggleRoomModalVisibility(roomModalIsOpen) {
-  let payload = { roomModalIsOpen }
-
-  return function(dispatch, getState) {
-    dispatch({ type: TOGGLE_MODAL_VISIBILITY, payload })
-  }
-}
-
-export function changeRoom(roomId) {
-  return {
-    type: CHANGE_ROOM,
-    payload: roomId
-  }
-}
 
 export function fetchMoreMessages(currentRoomId) {
   return function(dispatch, getState) {
-    dispatch({ type: FETCH_MESSAGES_PENDING })
+    dispatch(fetchMessagesPending())
 
     let messages = Object.values(getState().messages.records)
       .filter(({ roomId }) => roomId === currentRoomId )
@@ -149,10 +131,10 @@ export function fetchMoreMessages(currentRoomId) {
     }
     return messageQuery.find().then(
       messages => {
-        dispatch({ type: FETCH_MESSAGES_SUCCESS, payload: messages })
+        dispatch(fetchMessagesSuccess(messages))
       },
       (model, error) => {
-        dispatch({ type: FETCH_MESSAGES_FAIL, payload: error })
+        dispatch(fetchMessagesFail(error))
       }
     );
   }
@@ -160,15 +142,15 @@ export function fetchMoreMessages(currentRoomId) {
 
 export function fetchMessage(messageId) {
   return function(dispatch, getState) {
-    dispatch({ type: FETCH_MESSAGE_PENDING })
+    dispatch(fetchMessagePending())
 
     let newMessage = new Parse.Query(Message)
     newMessage.get(messageId).then(
       message => {
-        dispatch({ type: FETCH_MESSAGE_SUCCESS, payload: message })
+        dispatch(fetchMessageSuccess(message))
       },
       (model, error) => {
-        dispatch({ type: FETCH_MESSAGE_FAIL, payload: error })
+        dispatch(fetchMessageFail(error))
       }
     )
   }
@@ -176,14 +158,14 @@ export function fetchMessage(messageId) {
 
 export function fetchUsers() {
   return function(dispatch, getState) {
-    dispatch({ type: FETCH_USERS_PENDING })
+    dispatch(fetchUsersPending())
 
     new Parse.Query(User).find().then(
       users => {
-        dispatch({ type: FETCH_USERS_SUCCESS, payload: users })
+        dispatch(fetchUsersSuccess(users))
       },
       (model, error) => {
-        dispatch({ type: FETCH_USERS_FAIL, payload: error })
+        dispatch(fetchUsersFail(error))
       }
     );
   }
@@ -191,15 +173,15 @@ export function fetchUsers() {
 
 export function fetchUser(userId) {
   return function(dispatch, getState) {
-    dispatch({ type: FETCH_USER_PENDING })
+    dispatch(fetchUserPending())
 
     let newUser = new Parse.Query(Parse.User)
     newUser.get(userId).then(
       user => {
-        dispatch({ type: FETCH_USER_SUCCESS, payload: user })
+        dispatch(fetchUserSuccess(user))
       },
       (model, error) => {
-        dispatch({ type: FETCH_USER_FAIL, payload: error })
+        dispatch(fetchUserFail(error))
       }
     )
   }
@@ -207,7 +189,7 @@ export function fetchUser(userId) {
 
 export function sendMessage(message, roomId, userId) {
   return function(dispatch, getState) {
-    dispatch({ type: SEND_MESSAGE_PENDING })
+    dispatch(sendMessagePending())
 
     let user = new User();
     user.id = userId;
@@ -222,10 +204,10 @@ export function sendMessage(message, roomId, userId) {
     newMessage.save().then(
       result => {
         pushEvent("messageSent", { messageId: result.id });
-        dispatch({ type: SEND_MESSAGE_SUCCESS, payload: result })
+        dispatch(sendMessageSuccess(result))
       },
       (error) => {
-        dispatch({ type: SEND_MESSAGE_FAIL, payload: error })
+        dispatch(sendMessageFail(error))
       }
     );
   }
@@ -233,7 +215,7 @@ export function sendMessage(message, roomId, userId) {
 
 export function signupUser(username, password) {
   return function(dispatch, getState) {
-    dispatch({ type: SIGNUP_USER_PENDING })
+    dispatch(signupUserPending())
 
     var user = new Parse.User()
     user.set("username", username)
@@ -242,36 +224,53 @@ export function signupUser(username, password) {
     return user.signUp().then(
       result => {
         pushEvent("userSignup", { userId: result.id });
-        dispatch({ type: LOGIN_USER_SUCCESS, payload: result })
-        dispatch({ type: FETCH_USER_SUCCESS, payload: result })
+        dispatch(loginUserSuccess(result))
+        dispatch(fetchUserSuccess(result))
       },
       (error) => {
-        dispatch({ type: SIGNUP_USER_FAIL, payload: error })
+        dispatch(signupUserFail(error))
         return error;
       }
     )
   }
 }
 
+// var actionCounter = 0;
+//
+// function createAction() {
+//   var type = "Action_" + actionCounter++;
+//
+//   var actionCreator = function(payload) {
+//     return { type, payload };
+//   }
+//   actionCreator.type = type;
+//   actionCreator.toString = function() {
+//     return type;
+//   }
+//
+//   return actionCreator;
+// }
+
 export function setActiveUser(user) {
-  return { type: LOGIN_USER_SUCCESS, payload: user };
+  return loginUserSuccess(user);
 }
 
-export function logout(activeUser) {
-  Parse.User.logOut();
-  return { type: LOGOUT_USER, payload: null }
-}
+export var logoutUser = createAction();
+export var toggleModalVisibility = createAction();
+export var changeRoom = createAction();
+
+changeRoom.toString() // "Action_2"
 
 export function logUser(username, password) {
   return function(dispatch, getState) {
-    dispatch({ type: LOGIN_USER_PENDING })
+    dispatch(loginUserPending())
 
     return Parse.User.logIn(username, password).then(
       result => {
-        dispatch({ type: LOGIN_USER_SUCCESS, payload: result })
+        dispatch(loginUserSuccess(result))
       },
       (error) => {
-        dispatch({ type: LOGIN_USER_FAIL, payload: error })
+        dispatch(loginUserFail(error))
         return error
       }
     );
