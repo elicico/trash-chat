@@ -4,11 +4,11 @@ import cNames from 'classnames'
 import { fetchRooms, changeRoom, fetchUsers, addRoom, toggleModalVisibility, logoutUser, fetchRoom } from '../actions/actions'
 import pusherChannel from '../pusherChannel'
 import Modal from "./Modal"
+import { Link } from 'react-router'
 
 class RoomList extends Component {
   constructor(props) {
     super(props)
-    this.handleClick = this.handleClick.bind(this)
     this.renderRoom = this.renderRoom.bind(this)
     this.state = { value: "", roomNameError: false }
   }
@@ -56,11 +56,6 @@ class RoomList extends Component {
   handleLogoutClick(e) {
     e.preventDefault()
     this.props.dispatch(logoutUser())
-  }
-
-  handleClick(roomId, e) {
-    e.preventDefault()
-    this.props.dispatch(changeRoom(roomId))
   }
 
   render() {
@@ -130,13 +125,13 @@ class RoomList extends Component {
     })
 
     return (
-      <li
+      <Link
         key={i}
         className={ roomClass }
-        onClick={ this.handleClick.bind(this, room.objectId) }
+        to={ `/rooms/${room.objectId}` }
         >
         { room.name }
-      </li>
+      </Link>
     );
   }
 }

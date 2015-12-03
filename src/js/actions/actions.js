@@ -257,9 +257,6 @@ export function setActiveUser(user) {
 
 export var logoutUser = createAction();
 export var toggleModalVisibility = createAction();
-export var changeRoom = createAction();
-
-changeRoom.toString() // "Action_2"
 
 export function logUser(username, password) {
   return function(dispatch, getState) {

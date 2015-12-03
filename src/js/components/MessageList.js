@@ -121,16 +121,16 @@ class MessageList extends Component {
   }
 }
 
-function mapStateToProps(state) {
-  const { currentRoomId, users: stateUsers, messages: stateMessages, activeUserId } = state
+function mapStateToProps(state, props) {
+  const { users: stateUsers, messages: stateMessages, activeUserId } = state
 
   let messages = Object.values(stateMessages.records)
-    .filter(({ roomId }) => roomId === currentRoomId )
+    .filter(({ roomId }) => roomId === props.roomId )
     .sort(({ createdAt: a }, { createdAt: b }) => a - b);
 
   let users = messages.map(({ userId }) => stateUsers.records[userId]);
 
-  return { messages, users, roomId: currentRoomId, activeUserId };
+  return { messages, users, activeUserId };
 }
 
 export default connect(mapStateToProps)(MessageList)

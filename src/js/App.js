@@ -1,8 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import RoomList from "./components/RoomList"
-import MessageList from "./components/MessageList"
-import Composer from "./components/Composer"
 import { signupUser, logUser, fetchUsers } from './actions/actions'
 import Modal from './components/Modal'
 
@@ -50,10 +48,7 @@ class App extends Component {
     return (
       <div className="app">
         <RoomList />
-        <div className="app__messages-composer">
-          <MessageList />
-          <Composer />
-        </div>
+        { this.props.children }
         { this.props.appModalIsOpen && (
           <Modal>
             <input

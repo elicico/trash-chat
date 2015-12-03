@@ -19,7 +19,7 @@ class Composer extends Component {
     if (e.keyCode === 13) {
       e.preventDefault();
       if (this.state.value.trim().length > 0) {
-        this.props.dispatch(sendMessage(this.state.value, this.props.currentRoomId, this.props.activeUserId))
+        this.props.dispatch(sendMessage(this.state.value, this.props.roomId, this.props.activeUserId))
         this.setState({ value: "" })
       }
     }
@@ -43,10 +43,9 @@ class Composer extends Component {
 }
 
 function mapStateToProps(state) {
-  const { currentRoomId, activeUserId } = state
+  const { activeUserId } = state
 
   return {
-    currentRoomId,
     activeUserId
   }
 }

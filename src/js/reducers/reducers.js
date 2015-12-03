@@ -1,6 +1,6 @@
 import { combineReducers } from 'redux'
 import { createAction, createReducer } from 'redux-act'
-import { logoutUser, toggleModalVisibility, changeRoom } from '../actions/actions'
+import { logoutUser, toggleModalVisibility } from '../actions/actions'
 import {
   fetchRoomsPending,
   fetchRoomsSuccess,
@@ -33,11 +33,7 @@ import {
   fetchRoomSuccess,
   fetchRoomFail
 } from '../actions/actions'
-
-var currentRoomId = createReducer({
-  [ fetchRoomsSuccess ]: (state, payload) => payload[0].id,
-  [ changeRoom ]: (state, payload) => payload
-}, null)
+import { routerStateReducer } from 'redux-router'
 
 var modal = createReducer({
   [ toggleModalVisibility ]: (state, payload) => {
@@ -230,9 +226,9 @@ const rootReducer = function(state = {}, action) {
     users: users(state.users, action),
     rooms: rooms(state.rooms, action),
     messages: messages(state.messages, action),
-    currentRoomId: currentRoomId(state.currentRoomId, action),
     roomModalIsOpen: modal(state.roomModalIsOpen, action),
-    activeUserId: activeUserId(state.activeUserId, action)
+    activeUserId: activeUserId(state.activeUserId, action),
+    router: routerStateReducer(state.router, action)
   }
 }
 
