@@ -35,29 +35,35 @@ import {
 } from '../actions/actions'
 import { routerStateReducer } from 'redux-router'
 
+
 var modal = createReducer({
+
   [ toggleModalVisibility ]: (state, payload) => {
     return { ...state, roomModalIsOpen: payload }
   }
-},
-{ roomModalIsOpen: false } )
+},{ roomModalIsOpen: false } )
+
 
 var messages = createReducer({
+
   [ fetchMessagesPending ]: (state, payload) => {
     return { ...state, pending: true }
   },
+
   [ fetchMessagesSuccess ]: (state, payload) => {
-    var records = state.records;
+    var records = state.records
 
     for (let i=0; i<payload.length; i++) {
-      let message = payload[i];
+      let message = payload[i]
+      let roomIdNum = parseInt(message.room_id)
+
       records[message.id] = {
-        createdAt: message.createdAt,
-        message: message.get("message"),
+        message: message.message,
         objectId: message.id,
-        userId: message.get("user").id,
-        roomId: message.get("room").id
-      };
+        sentAt: message.sent_at,
+        userId: message.user_id,
+        roomId: roomIdNum
+      }
     }
 
     return {
@@ -66,17 +72,19 @@ var messages = createReducer({
       records
     }
   },
+
   [ fetchMessageSuccess ]: (state, payload) => {
     let records = state.records
     let message = payload
+    let roomIdNum = parseInt(message.room_id)
 
-      records[message.id] = {
-        createdAt: message.createdAt,
-        message: message.get("message"),
-        objectId: message.id,
-        userId: message.get("user").id,
-        roomId: message.get("room").id
-      }
+    records[message.id] = {
+      message: message.message,
+      objectId: message.id,
+      sentAt: message.sent_at,
+      userId: message.user_id,
+      roomId: roomIdNum
+    }
 
     return {
       ...state,
@@ -84,16 +92,19 @@ var messages = createReducer({
       records
     }
   },
+
   [ sendMessageSuccess ]: (state, payload) => {
-    var records = state.records;
+    var records = state.records
+
+    let roomIdNum = parseInt(payload.room_id)
 
     records[payload.id] = {
-      createdAt: payload.createdAt,
-      message: payload.get("message"),
+      message: payload.message,
       objectId: payload.id,
-      userId: payload.get("user").id,
-      roomId: payload.get("room").id
-    };
+      sentAt: payload.sent_at,
+      userId: payload.user_id,
+      roomId: roomIdNum
+    }
 
     return {
       ...state,
@@ -101,16 +112,20 @@ var messages = createReducer({
       records
     }
   }
+
 }, {
   pending: false,
   error: null,
   records: {}
 } )
 
+
 var users = createReducer({
+
   [ fetchUsersPending ]: (state, payload) => {
     return { ...state, pending: true }
   },
+
   [ fetchUsersSuccess ]: (state, payload) => {
     var records = state.records
 
@@ -118,7 +133,7 @@ var users = createReducer({
       let user = payload[i];
       records[user.id] = {
         objectId: user.id,
-        username: user.get("username")
+        username: user.username
       }
     }
 
@@ -129,13 +144,14 @@ var users = createReducer({
       records
     }
   },
+
   [ fetchUserSuccess ]: (state, payload) => {
     var records = state.records
     let user = payload
 
     records[user.id] = {
       objectId: user.id,
-      username: user.get("username")
+      username: user.username
     }
 
     return {
@@ -144,33 +160,47 @@ var users = createReducer({
       records
     }
   },
-  [ signupUserPending ]: (state, pending) => {
+
+  [ signupUserPending ]: (state, payload) => {
     return { ...state, signupPending: true }
   },
-  [ signupUserFail ]: (state, pending) => {
+
+  [ signupUserFail ]: (state, payload) => {
     return { ...state, signupPending: false }
+  },
+
+  [ loginUserSuccess ]: (state, payload) => {
+    return { ...state, currentUser : payload }
+  },
+
+  [ logoutUser ]: (state, payload) => {
+    return { ...state, currentUser : null }
   }
+
 }, {
+  currentUser : null,
   signupPending: false,
   pending: false,
   error: null,
   records: {}
 } )
 
+
 var rooms = createReducer({
+
   [ fetchRoomsPending ]: (state, payload) => {
     return { ...state, pending: true }
   },
-  [ fetchRoomsSuccess ]: (state, payload) => {
-    var records = {};
 
+  [ fetchRoomsSuccess ]: (state, payload) => {
+    var records = {}
     for (let i=0; i<payload.length; i++) {
       let room = payload[i];
 
       records[room.id] = {
         objectId: room.id,
-        name: room.get("name")
-      };
+        name: room.name
+      }
     }
 
     return {
@@ -179,13 +209,14 @@ var rooms = createReducer({
       records
     }
   },
+
   [ fetchRoomSuccess ]: (state, payload) => {
     var records = state.records
-    let newroom = payload;
+    let newroom = payload
 
     records[newroom.id] = {
       objectId: newroom.id,
-      name: newroom.get("name")
+      name: newroom.name
     }
 
     return {
@@ -194,13 +225,14 @@ var rooms = createReducer({
       records
     }
   },
+
   [ addRoomSuccess ]: (state, payload) => {
     var records = state.records
-    let room = payload;
+    let room = payload
 
     records[room.id] = {
       objectId: room.id,
-      name: room.get("name")
+      name: room.name
     }
 
     return {
@@ -209,17 +241,13 @@ var rooms = createReducer({
       records
     }
   }
+
 }, {
   pending: false,
   error: null,
   records: {}
 } )
 
-
-var activeUserId = createReducer({
-  [ loginUserSuccess ]: (state, payload) => payload.id,
-  [ logoutUser ]: (state, payload) => null
-}, null)
 
 const rootReducer = function(state = {}, action) {
   return {
@@ -227,7 +255,6 @@ const rootReducer = function(state = {}, action) {
     rooms: rooms(state.rooms, action),
     messages: messages(state.messages, action),
     roomModalIsOpen: modal(state.roomModalIsOpen, action),
-    activeUserId: activeUserId(state.activeUserId, action),
     router: routerStateReducer(state.router, action)
   }
 }

@@ -1,8 +1,15 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import RoomList from "./components/RoomList"
-import { signupUser, logUser, fetchUsers } from './actions/actions'
+import { signupUser, logUser, fetchUsers, setActiveUser } from './actions/actions'
 import Modal from './components/Modal'
+import { Route, Link } from 'react-router'
+import {
+  ReduxRouter,
+  routerStateReducer,
+  reduxReactRouter,
+  pushState
+} from 'redux-router'
 
 class App extends Component {
   constructor(props) {
@@ -12,6 +19,11 @@ class App extends Component {
 
   componentDidMount() {
     this.props.dispatch(fetchUsers())
+
+    let currentUser = JSON.parse(localStorage.getItem("currentUser"));
+    if (currentUser) {
+      this.props.dispatch(setActiveUser(currentUser))
+    }
   }
 
   handleUsernameChange(e) {
@@ -26,7 +38,11 @@ class App extends Component {
     e.preventDefault()
     this.props.dispatch(signupUser(this.state.username, this.state.password))
     .then(
-      () => this.setState({ username: "", password: ""}),
+      () => {
+        this.props.dispatch(logCurrentUser(this.state.username, this.state.password))
+        this.setState({ username: "", password: ""})
+        this.props.dispatch(pushState(null, '/rooms/1'))
+      },
       (error) => this.setState({ logError: error.message})
     )
   }
@@ -35,7 +51,11 @@ class App extends Component {
     e.preventDefault()
     this.props.dispatch(logUser(this.state.username, this.state.password))
     .then(
-      () => this.setState({ username: "", password: "" }),
+      () => {
+        this.props.dispatch(logCurrentUser(this.state.username, this.state.password))
+        this.setState({ username: "", password: ""})
+        this.props.dispatch(pushState(null, '/rooms/1'))
+      },
       (error) => this.setState({ logError: error.message })
     )
   }
@@ -47,9 +67,11 @@ class App extends Component {
   render() {
     return (
       <div className="app">
-        <RoomList />
+        { this.props.currentUser && (
+          <RoomList roomId={ this.props.params.roomId } />
+        )}
         { this.props.children }
-        { this.props.appModalIsOpen && (
+        { (this.props.currentUser === null && this.props.appModalIsOpen) && (
           <Modal>
             <input
               type='text'
@@ -112,11 +134,12 @@ class App extends Component {
 }
 
 function mapStateToProps(state) {
-  const { activeUserId, users } = state
+  const { users } = state
 
   return {
-    appModalIsOpen: !activeUserId,
+    appModalIsOpen: !users.currentUser,
     users : Object.values(users.records),
+    currentUser: users.currentUser,
     userSignupPending : users.signupPending
   }
 }

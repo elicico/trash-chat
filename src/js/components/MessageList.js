@@ -88,14 +88,14 @@ class MessageList extends Component {
 
     let messageClass = cNames({
       'messageList__item cf': true,
-      'messageList__item--blue': message.userId !== this.props.activeUserId,
-      'messageList__item--pink': message.userId === this.props.activeUserId
+      'messageList__item--blue': message.userId !== this.props.currentUser,
+      'messageList__item--pink': message.userId === this.props.currentUser
     })
 
     let textClass = cNames({
       'messageList__item__text': true,
-      'messageList__item__text--left': message.userId !== this.props.activeUserId,
-      'messageList__item__text--right': message.userId === this.props.activeUserId
+      'messageList__item__text--left': message.userId !== this.props.currentUser,
+      'messageList__item__text--right': message.userId === this.props.currentUser
     })
 
     var convertedMessage = ReactEmoji.emojify(message.message).map((item) => {
@@ -112,7 +112,9 @@ class MessageList extends Component {
         key={ message.objectId }
       >
         <div className={ textClass }>
-          <span className="messageList__item__text__username">{ users[i].username }</span>
+          { users[i] &&
+            <span className="messageList__item__text__username">{ users[i].username }</span>
+          }
           <br />
           { convertedMessage }
         </div>
@@ -122,15 +124,23 @@ class MessageList extends Component {
 }
 
 function mapStateToProps(state, props) {
-  const { users: stateUsers, messages: stateMessages, activeUserId } = state
+  const { users: stateUsers, messages: stateMessages } = state
 
   let messages = Object.values(stateMessages.records)
-    .filter(({ roomId }) => roomId === props.roomId )
-    .sort(({ createdAt: a }, { createdAt: b }) => a - b);
+    .filter(({ roomId }) => roomId === parseInt(props.roomId) )
+    .sort(({ objectId: a }, { objectId: b }) => a - b);
 
-  let users = messages.map(({ userId }) => stateUsers.records[userId]);
+  let users = messages.map(({ userId }) => stateUsers.records[userId])
 
-  return { messages, users, activeUserId };
+  let currentUser = function() {
+    if (stateUsers.currentUser) {
+      return stateUsers.currentUser.id
+    } else {
+      return ""
+    }
+  }()
+
+  return { messages, users, currentUser };
 }
 
 export default connect(mapStateToProps)(MessageList)

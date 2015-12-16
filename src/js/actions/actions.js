@@ -2,6 +2,8 @@ import Parse from 'parse'
 import fetch from 'isomorphic-fetch'
 import { createStore } from 'redux'
 import { createAction } from 'redux-act'
+import { polyfill } from 'es6-promise'
+polyfill()
 
 export const fetchRoomsPending = createAction()
 export const fetchRoomsSuccess = createAction()
@@ -47,7 +49,7 @@ let pushEvent = function(eventName, payload) {
   payload.eventName = eventName;
 
   return fetch(
-    'https://zapier.com/hooks/catch/3ks388/',
+    'https://zapier.com/hooks/catch/3elae4/',
     {
       method: 'POST',
       headers: { 'Accept': 'application/json' },
@@ -56,23 +58,18 @@ let pushEvent = function(eventName, payload) {
   );
 }
 
-
-const Room = Parse.Object.extend("Room");
-const User = Parse.Object.extend("User");
-const Message = Parse.Object.extend("Message");
-
 export function fetchRooms() {
   return function(dispatch, getState) {
     dispatch(fetchRoomsPending())
 
-    new Parse.Query(Room).find().then(
-      rooms => {
+    return fetch('http://127.0.0.1:3517/rooms')
+      .then((response) => {
+        return response.json()
+      }).then((rooms) => {
         dispatch(fetchRoomsSuccess(rooms))
-      },
-      (model, error) => {
+      }).catch((error) => {
         dispatch(fetchRoomsFail(error))
-      }
-    );
+      })
   }
 }
 
@@ -80,15 +77,14 @@ export function fetchRoom(roomAdded) {
   return function(dispatch, getState) {
     dispatch(fetchRoomPending())
 
-    let room = new Parse.Query(Room)
-    room.get(roomAdded).then(
-      room => {
+    return fetch(`http://127.0.0.1:3517/rooms/${parseInt(roomAdded.roomId)}`)
+      .then((response) => {
+        return response.json()
+      }).then((room) => {
         dispatch(fetchRoomSuccess(room))
-      },
-      (model, error) => {
+      }).catch((error) => {
         dispatch(fetchRoomFail(error))
-      }
-    );
+      })
   }
 }
 
@@ -96,17 +92,23 @@ export function addRoom(newRoom) {
   return function(dispatch, getState) {
     dispatch(addRoomPending())
 
-    let room = new Room()
-    room.set("name", newRoom)
-    room.save().then(
-      result => {
-        pushEvent("roomAdded", { roomId: result.id });
-        dispatch(addRoomSuccess(result))
-      },
-      (model, error) => {
+    return fetch('http://127.0.0.1:3517/rooms',
+      {
+        method: 'post',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ "name": newRoom })
+      } )
+      .then((response) => {
+        return response.json()
+      }).then((room) => {
+        pushEvent("roomAdded", { roomId: room.id });
+        dispatch(addRoomSuccess(room))
+      }).catch((error) => {
         dispatch(addRoomFail(error))
-      }
-    )
+      })
   }
 }
 
@@ -119,71 +121,34 @@ export function fetchMoreMessages(currentRoomId) {
       .filter(({ roomId }) => roomId === currentRoomId )
       .sort(({ createdAt: a }, { createdAt: b }) => a - b)
 
-    var messageQuery = new Parse.Query(Message)
-    var room = new Room()
-    room.id = currentRoomId
-    messageQuery.equalTo("room", room)
-    messageQuery.descending("createdAt")
-    messageQuery.limit(10)
+    let url = `http://127.0.0.1:3517/rooms/${currentRoomId}/messages`
 
     if (messages.length !== 0) {
-      messageQuery.lessThan("createdAt", messages[0].createdAt)
+      url += `?idLessThan=${messages[0].id}`
     }
-    return messageQuery.find().then(
-      messages => {
+
+    return fetch(`http://127.0.0.1:3517/rooms/${currentRoomId}/messages`)
+      .then((response) => {
+        return response.json()
+      }).then((messages) => {
         dispatch(fetchMessagesSuccess(messages))
-      },
-      (model, error) => {
+      }).catch((error) => {
         dispatch(fetchMessagesFail(error))
-      }
-    );
+      })
   }
 }
 
 export function fetchMessage(messageId) {
   return function(dispatch, getState) {
     dispatch(fetchMessagePending())
-
-    let newMessage = new Parse.Query(Message)
-    newMessage.get(messageId).then(
-      message => {
+    return fetch(`http://127.0.0.1:3517/messages/${messageId}`)
+      .then((response) => {
+        return response.json()
+      }).then((message) => {
         dispatch(fetchMessageSuccess(message))
-      },
-      (model, error) => {
+      }).catch((error) => {
         dispatch(fetchMessageFail(error))
-      }
-    )
-  }
-}
-
-export function fetchUsers() {
-  return function(dispatch, getState) {
-    dispatch(fetchUsersPending())
-
-    new Parse.Query(User).find().then(
-      users => {
-        dispatch(fetchUsersSuccess(users))
-      },
-      (model, error) => {
-        dispatch(fetchUsersFail(error))
-      }
-    );
-  }
-}
-
-export function fetchUser(userId) {
-  return function(dispatch, getState) {
-    dispatch(fetchUserPending())
-
-    let newUser = new Parse.Query(Parse.User)
-    newUser.get(userId).then(
-      user => {
-        dispatch(fetchUserSuccess(user))
-      },
-      (model, error) => {
-        dispatch(fetchUserFail(error))
-      }
-    )
+      })
   }
 }
 
@@ -191,25 +156,53 @@ export function sendMessage(message, roomId, userId) {
   return function(dispatch, getState) {
     dispatch(sendMessagePending())
 
-    let user = new User();
-    user.id = userId;
-
-    let room = new Room();
-    room.id = roomId;
-
-    let newMessage = new Message()
-    newMessage.set("message", message)
-    newMessage.set("room", room)
-    newMessage.set("user", user)
-    newMessage.save().then(
-      result => {
-        pushEvent("messageSent", { messageId: result.id });
-        dispatch(sendMessageSuccess(result))
-      },
-      (error) => {
+    return fetch('http://127.0.0.1:3517/messages',
+      {
+        method: 'post',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ "message": message, "room_id": roomId, "user_id": userId })
+      } )
+      .then((response) => {
+        return response.json()
+      }).then((message) => {
+        pushEvent("messageSent", { messageId: message.id })
+        dispatch(sendMessageSuccess(message))
+      }).catch((error) => {
         dispatch(sendMessageFail(error))
-      }
-    );
+      })
+  }
+}
+
+export function fetchUsers() {
+  return function(dispatch, getState) {
+    dispatch(fetchUsersPending())
+
+    return fetch('http://127.0.0.1:3517/users')
+      .then((response) => {
+        return response.json()
+      }).then((users) => {
+        dispatch(fetchUsersSuccess(users))
+      }).catch((error) => {
+        dispatch(fetchUsersFail(error))
+      })
+  }
+}
+
+export function fetchUser(userId) {
+  return function(dispatch, getState) {
+    dispatch(fetchUserPending())
+
+    return fetch(`http://127.0.0.1:3517/users/${userId}`)
+      .then((response) => {
+        return response.json()
+      }).then((user) => {
+        dispatch(fetchUserSuccess(user))
+      }).catch((error) => {
+        dispatch(fetchUserFail(error))
+      })
   }
 }
 
@@ -217,21 +210,27 @@ export function signupUser(username, password) {
   return function(dispatch, getState) {
     dispatch(signupUserPending())
 
-    var user = new Parse.User()
-    user.set("username", username)
-    user.set("password", password)
-
-    return user.signUp().then(
-      result => {
-        pushEvent("userSignup", { userId: result.id });
-        dispatch(loginUserSuccess(result))
-        dispatch(fetchUserSuccess(result))
-      },
-      (error) => {
+    return fetch(`http://127.0.0.1:3517/users`,
+      {
+        method: 'post',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ "username": username, "password": password })
+      } )
+      .then((response) => {
+        return response.json()
+      }).then((user) => {
+        pushEvent("userSignup", { userId: user.id })
+        localStorage.setItem("currentUser", JSON.stringify(user))
+        dispatch(loginUserSuccess(user))
+        dispatch(fetchUserSuccess(user))
+      }).catch((error) => {
         dispatch(signupUserFail(error))
-        return error;
-      }
-    )
+          return error
+      })
+
   }
 }
 
@@ -262,15 +261,24 @@ export function logUser(username, password) {
   return function(dispatch, getState) {
     dispatch(loginUserPending())
 
-    return Parse.User.logIn(username, password).then(
-      result => {
-        dispatch(loginUserSuccess(result))
-      },
-      (error) => {
+    return fetch(`http://127.0.0.1:3517/users/authenticate`,
+      {
+        method: 'post',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ "username": username, "password": password })
+      } )
+      .then((response) => {
+        return response.json()
+      }).then((user) => {
+        localStorage.setItem("currentUser", JSON.stringify(user))
+        dispatch(loginUserSuccess(user))
+      }).catch((error) => {
         dispatch(loginUserFail(error))
-        return error
-      }
-    );
+          return error
+      })
 
   }
 }

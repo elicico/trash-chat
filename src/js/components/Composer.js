@@ -17,9 +17,9 @@ class Composer extends Component {
 
   handleKeyDown(e) {
     if (e.keyCode === 13) {
-      e.preventDefault();
+      e.preventDefault()
       if (this.state.value.trim().length > 0) {
-        this.props.dispatch(sendMessage(this.state.value, this.props.roomId, this.props.activeUserId))
+        this.props.dispatch(sendMessage(this.state.value, this.props.roomId, this.props.currentUser))
         this.setState({ value: "" })
       }
     }
@@ -43,10 +43,18 @@ class Composer extends Component {
 }
 
 function mapStateToProps(state) {
-  const { activeUserId } = state
+  const { users } = state
+
+  let currentUser = function() {
+    if (users.currentUser) {
+      return users.currentUser.id
+    } else {
+      return ""
+    }
+  }()
 
   return {
-    activeUserId
+    currentUser
   }
 }
 

@@ -4,7 +4,13 @@ import cNames from 'classnames'
 import { fetchRooms, changeRoom, fetchUsers, addRoom, toggleModalVisibility, logoutUser, fetchRoom } from '../actions/actions'
 import pusherChannel from '../pusherChannel'
 import Modal from "./Modal"
-import { Link } from 'react-router'
+import { Route, Link } from 'react-router'
+import {
+  ReduxRouter,
+  routerStateReducer,
+  reduxReactRouter,
+  pushState
+} from 'redux-router'
 
 class RoomList extends Component {
   constructor(props) {
@@ -15,9 +21,11 @@ class RoomList extends Component {
 
   componentDidMount() {
     this.props.dispatch(fetchRooms())
-
+    .then(() => {
+      this.props.dispatch(pushState(null, `/rooms/${this.props.rooms[0].objectId}`))
+    })
     pusherChannel.bind('roomAdded', (object) => {
-      this.props.dispatch(fetchRoom(object.roomId))
+      this.props.dispatch(fetchRoom(object))
     });
   }
 
@@ -47,6 +55,10 @@ class RoomList extends Component {
         this.setState({ roomNameError: "A blank named room? Pls stahp." })
       } else {
         this.props.dispatch(addRoom(this.state.value))
+        .then(() => {
+          let newRoom = this.props.rooms.slice(-1)
+          this.props.dispatch(pushState(null, `/rooms/${newRoom[0].objectId}`))
+        })
         this.props.dispatch(toggleModalVisibility(false))
         this.setState({ value: "" })
       }
@@ -56,6 +68,7 @@ class RoomList extends Component {
   handleLogoutClick(e) {
     e.preventDefault()
     this.props.dispatch(logoutUser())
+    this.props.dispatch(pushState(null, '/'))
   }
 
   render() {
@@ -121,7 +134,7 @@ class RoomList extends Component {
   renderRoom(room, i) {
     let roomClass = cNames({
       'roomList__ul__item': true,
-      'roomList__ul__item--active': room.objectId === this.props.roomId
+      'roomList__ul__item--active': room.objectId === parseInt(this.props.roomId)
     })
 
     return (
@@ -137,14 +150,12 @@ class RoomList extends Component {
 }
 
 function mapStateToProps(state) {
-  const { currentRoomId, rooms, roomModalIsOpen, activeUserId } = state
+  const { rooms, roomModalIsOpen } = state
 
   return {
     pending: rooms.pending,
     rooms: Object.values(rooms.records),
-    roomId: currentRoomId,
-    roomModalIsOpen: roomModalIsOpen.roomModalIsOpen,
-    activeUserId
+    roomModalIsOpen: roomModalIsOpen.roomModalIsOpen
   }
 }
 
