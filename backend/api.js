@@ -42,16 +42,18 @@ export default function(app) {
   app.get('/rooms/:roomId/messages', function(req, res, next) {
     let dbQuery = Message
                   .query()
+                  .where('room_id', req.params.roomId)
                   .orderBy('sent_at', 'desc')
                   .limit(10)
-                  .where('room_id', req.params.roomId)
 
     if (req.query.idLessThan) {
       dbQuery = dbQuery.where('id', '<', req.query.idLessThan)
     }
 
     dbQuery
-      .then(messsages => res.json(messages))
+      .then(messages => {
+        res.json(messages)
+      })
       .catch(next)
   })
 

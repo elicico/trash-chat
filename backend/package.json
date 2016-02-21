@@ -8,6 +8,7 @@
     "babel-preset-es2015": "^6.1.18",
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.14.1",
+    "express": "^4.13.4",
     "express-cors": "^0.0.3",
     "knex": "^0.9.0",
     "objection": "^0.3.3",

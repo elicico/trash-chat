@@ -1,4 +1,3 @@
-import Parse from 'parse'
 import fetch from 'isomorphic-fetch'
 import { createStore } from 'redux'
 import { createAction } from 'redux-act'
@@ -127,7 +126,7 @@ export function fetchMoreMessages(currentRoomId) {
       url += `?idLessThan=${messages[0].id}`
     }
 
-    return fetch(`http://127.0.0.1:3517/rooms/${currentRoomId}/messages`)
+    return fetch(url)
       .then((response) => {
         return response.json()
       }).then((messages) => {
@@ -163,7 +162,7 @@ export function sendMessage(message, roomId, userId) {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ "message": message, "room_id": roomId, "user_id": userId })
+        body: JSON.stringify({ "message": message, "room_id": parseInt(roomId), "user_id": userId })
       } )
       .then((response) => {
         return response.json()

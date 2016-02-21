@@ -1,6 +1,5 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
-import Parse from 'parse'
 import Textarea from 'react-textarea-autosize'
 
 import { sendMessage } from "../actions/actions"
