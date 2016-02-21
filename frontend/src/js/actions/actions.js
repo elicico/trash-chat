@@ -44,19 +44,6 @@ export const fetchRoomPending = createAction()
 export const fetchRoomSuccess = createAction()
 export const fetchRoomFail = createAction()
 
-let pushEvent = function(eventName, payload) {
-  payload.eventName = eventName;
-
-  return fetch(
-    'https://zapier.com/hooks/catch/3elae4/',
-    {
-      method: 'POST',
-      headers: { 'Accept': 'application/json' },
-      body: JSON.stringify(payload)
-    }
-  );
-}
-
 export function fetchRooms() {
   return function(dispatch, getState) {
     dispatch(fetchRoomsPending())
@@ -103,7 +90,6 @@ export function addRoom(newRoom) {
       .then((response) => {
         return response.json()
       }).then((room) => {
-        pushEvent("roomAdded", { roomId: room.id });
         dispatch(addRoomSuccess(room))
       }).catch((error) => {
         dispatch(addRoomFail(error))
@@ -167,7 +153,6 @@ export function sendMessage(message, roomId, userId) {
       .then((response) => {
         return response.json()
       }).then((message) => {
-        pushEvent("messageSent", { messageId: message.id })
         dispatch(sendMessageSuccess(message))
       }).catch((error) => {
         dispatch(sendMessageFail(error))
@@ -221,7 +206,6 @@ export function signupUser(username, password) {
       .then((response) => {
         return response.json()
       }).then((user) => {
-        pushEvent("userSignup", { userId: user.id })
         localStorage.setItem("currentUser", JSON.stringify(user))
         dispatch(loginUserSuccess(user))
         dispatch(fetchUserSuccess(user))

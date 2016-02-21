@@ -2,7 +2,6 @@ import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import cNames from 'classnames'
 import { fetchRooms, changeRoom, fetchUsers, addRoom, toggleModalVisibility, logoutUser, fetchRoom } from '../actions/actions'
-import pusherChannel from '../pusherChannel'
 import Modal from "./Modal"
 import { Route, Link } from 'react-router'
 import {
@@ -24,9 +23,6 @@ class RoomList extends Component {
     .then(() => {
       this.props.dispatch(pushState(null, `/rooms/${this.props.rooms[0].objectId}`))
     })
-    pusherChannel.bind('roomAdded', (object) => {
-      this.props.dispatch(fetchRoom(object))
-    });
   }
 
   openModal(e) {

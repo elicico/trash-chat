@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom'
 import { connect } from 'react-redux'
 import cNames from 'classnames'
 import { fetchMoreMessages, fetchUsers, fetchUser, fetchMessage } from '../actions/actions'
-import pusherChannel from '../pusherChannel'
 import InfiniteScroll from './InfiniteScroll'
 import ReactEmoji from 'react-emoji'
 import ReactAutolink from 'react-autolink'
@@ -20,13 +19,6 @@ class MessageList extends Component {
     }
     this.props.dispatch(fetchUsers())
 
-    pusherChannel.bind('messageSent', (object) => {
-      this.props.dispatch(fetchMessage(object.messageId))
-    });
-
-    pusherChannel.bind('userSignup', (object) => {
-      this.props.dispatch(fetchUser(object.userId))
-    });
   }
 
   componentWillReceiveProps(newProps) {

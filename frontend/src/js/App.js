@@ -52,7 +52,7 @@ class App extends Component {
     this.props.dispatch(logUser(this.state.username, this.state.password))
     .then(
       () => {
-        this.props.dispatch(logCurrentUser(this.state.username, this.state.password))
+        this.props.dispatch(logUser(this.state.username, this.state.password))
         this.setState({ username: "", password: ""})
         this.props.dispatch(pushState(null, '/rooms/1'))
       },
